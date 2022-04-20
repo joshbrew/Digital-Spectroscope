@@ -5,6 +5,8 @@ let component = require('./spectrometer.node.html');
 //todo:
 /*
     Make rectangle dynamically resizable (can use an invisible element overlay to be lazy)
+    
+    Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis
 */
 
 //See: https://github.com/brainsatplay/domelement
