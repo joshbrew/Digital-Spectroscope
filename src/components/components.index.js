@@ -1,5 +1,5 @@
-import './other/acyclicgraph/graph.node.js';
-import './other/acyclicgraph/acyclic.graph.js';
+import './acyclicgraph/graph.node.js';
+import './acyclicgraph/acyclic.graph.js';
 import './other/canvas/canvas.node.js';
 import './other/input/button.node.js';
 import './other/input/input.node.js';

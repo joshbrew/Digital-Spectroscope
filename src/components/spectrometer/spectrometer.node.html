@@ -1,22 +1,26 @@
 <div style="z-index:10;">
-    <button id="webcam">Webcam</button>
-    <button id="image">Image</button>
-    <select id="imgselect">
+    <button id="snip">Capture</button>
+    <button id="animate">Record</button>
+    <button id="webcam">Use Webcam</button>
+    <button id="image">Use Image</button>
+    <span style="color:white;">Image:</span><select id="imgselect">
         <option value="src/assets/spectrum_full.png" selected>Full Image</option>
-        <option value="src/assets/spectrum1.jpg">Spectrum 1</option>
+        <option value="src/assets/spectrum1.png">Spectrum 1</option>
         <option value="src/assets/spectrum2.jpg">Spectrum 2</option>
     </select>
     <input type="url" id="imgurl" placeholder="Image URL"></input>
     <button id="setImgUrl">Set Image URL</button>
     <input type="url" id="videourl" placeholder="Video URL"></input>
     <button id="setVideoUrl">Set Video URL</button>
+    <input type="file" id="fileinput" placeholder="From File"></input>
+    <span style="color:white;">Click to draw a rectangle around the portion of the image you want to analyze!</span>
 </div>
-<div height="100%" width="100%">
+<div>
     <canvas id="picker" style="position:absolute; z-index:3;" height="100%" width="100%"></canvas>
     <img src="" style="position:absolute; z-index:1;" width="100%" height="100%"></img>
     <video src="" style="position:absolute; display:none; z-index:2;" height="100%" width="100%"></video>
 </div>
-<div style="z-index:11; color:white; position:absolute; top:100vh;">
+<div style="z-index:11; top:90vh; color:white; position:absolute; min-height:80px;">
     Results:<br>
     <canvas id="capture"></canvas>
     <canvas id="graph"></canvas>

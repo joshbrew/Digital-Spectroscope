@@ -1,4 +1,4 @@
-import {NodeDiv} from '../acyclicgraph/graph.node'
+import {NodeDiv} from '../../acyclicgraph/graph.node'
 
 let component = require('./canvas.node.html');
 

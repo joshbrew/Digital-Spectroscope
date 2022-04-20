@@ -1,4 +1,4 @@
-import {NodeDiv} from '../other/acyclicgraph/graph.node'
+import {NodeDiv} from '../acyclicgraph/graph.node'
 
 let component = require('./spectrometer.node.html');
 
@@ -22,7 +22,8 @@ export class Spectrometer extends NodeDiv {
 
     props={
         picking:0,
-        picked:{x0:0,x1:100,y0:0,y1:100},
+        picked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
+        running:false,//running capture loop?
         mode:'img',
         operator:(
             input,
@@ -33,13 +34,13 @@ export class Spectrometer extends NodeDiv {
 
             if(cmd === 'animate') {
                 //draw loop
-                this.draw(input,node,origin,cmd);
-                for(let i = 0; i < this.drawFuncs.length; i++) { //lets use other nodes to send draw functions to the canvas
-                    let f = this.drawFuncs[i];
-                    if(typeof f === 'function') {
-                        f(input,node,origin,cmd); //pass the args in (need these if you pass arrow functions)
-                    }
-                }
+                // this.draw(input,node,origin,cmd);
+                // for(let i = 0; i < this.drawFuncs.length; i++) { //lets use other nodes to send draw functions to the canvas
+                //     let f = this.drawFuncs[i];
+                //     if(typeof f === 'function') {
+                //         f(input,node,origin,cmd); //pass the args in (need these if you pass arrow functions)
+                //     }
+                // }
             } else {
                 //e.g. input commands
                 if(typeof input === 'object') {
@@ -71,6 +72,117 @@ export class Spectrometer extends NodeDiv {
 
     //set the template string or function (which can input props to return a modified string)
     template=component;
+
+    //DOMElement custom callbacks:
+    oncreate=(props)=>{
+        this.canvas = this.querySelector('#picker');
+        this.img = this.querySelector('img');
+        this.video = this.querySelector('video');
+        this.select = this.querySelector('#imgselect');
+        this.capture = this.querySelector('#capture');
+        this.graph = this.querySelector('#graph');
+        
+        //fileinput
+        this.querySelector('#fileinput').onchange = this.handleFileInput;
+
+        this.querySelector('#snip').onclick = () => {
+            if(this.props.picked.y1 && this.props.picked.x1) {
+                this.canvasCapture();
+            }
+        }
+
+
+        this.querySelector('#animate').onclick = () => {
+            if(this.props.running) {
+                this.props.running = false;
+                this.querySelector('#animate').innerHTML = "Record";
+            }
+            else if(this.props.picked.y1 && this.props.picked.x1) {
+                this.props.running = true;
+                let anim = () => {
+                    if(!this.props.running) return;
+                    this.canvasCapture();
+
+                    setTimeout(()=>{
+                        requestAnimationFrame(anim);
+                    },1000/60); //60fps hard cap
+                }
+
+                anim();
+                this.querySelector('#animate').innerHTML = "Capturing";
+            }
+        }
+
+        this.select.onchange = (ev) => {
+            if(this.mode === 'img') this.useImage();
+        }
+        
+        this.querySelector('#webcam').onclick = this.useWebcam;
+        this.querySelector('#image').onclick = this.useImage;
+        this.querySelector('#setImgUrl').onclick = this.inputImgUrl;
+        this.querySelector('#setVideoUrl').onclick = this.inputVideoSrc;
+
+        if(props.width) {
+            this.canvas.width = props.width;
+            this.canvas.style.width = props.width;
+            this.video.width = props.width;
+            this.video.style.width = props.width;
+            this.img.width = props.width;
+            this.img.style.width = props.width;
+        }
+        if(props.height) {
+            this.canvas.height = props.height;
+            this.canvas.style.height = props.height;
+            this.video.height = props.height;
+            this.video.style.height = props.height;
+            this.img.height = props.height;
+            this.img.style.height = props.height;
+        }
+        if(props.style) {
+            this.canvas.style = props.style;
+            this.canvas.zIndex = 3;
+            this.video.style = props.style;
+            this.video.zIndex = 2;
+            this.img.style = props.style;
+            this.img.zIndex = 1;
+            setTimeout(()=>{
+                this.canvas.height = this.canvas.clientHeight;
+                this.canvas.width = this.canvas.clientWidth;
+                this.img.width = props.width;
+                this.img.height = props.height;
+                this.video.width = props.width;
+                this.video.height = props.height;
+            },10); //slight recalculation delay time
+        }
+
+        
+        // this.offscreen.height = this.canvas.height;
+        // this.offscreen.width = this.canvas.width;
+
+        props.canvas = this.canvas;
+        if(props.context) props.context = this.canvas.getContext(props.context);
+        else props.context = this.canvas.getContext('2d');
+        this.context = props.context;
+        this.ctx = this.context;
+        props.ctx = this.context;
+
+
+        this.offscreen = new OffscreenCanvas(this.canvas.width,this.canvas.height);
+        this.offscreenctx = this.offscreen.getContext('2d');
+        
+        this.capturectx = this.capture.getContext('2d');
+        this.graphctx = this.capture.getContext('2d');
+
+        this.useImage();
+
+        this.props.picked.x1 = this.canvas.width;
+        this.props.picked.y1 = this.canvas.height;
+
+        this.canvas.onclick = this.canvasClicked;
+
+        setTimeout(()=>{if(props.animate) props.node.runAnimation();},10)
+
+    }
 
     draw(input,node,origin,cmd) {
         let canvas = this.props.canvas;
@@ -115,7 +227,7 @@ export class Spectrometer extends NodeDiv {
             this.video.src = '';
             this.video.style.display = 'none';
         }
-        this.img.src = this.select.value;
+        this.img.src = this.select.options[this.select.selectedIndex].value;
         this.img.style.display = '';
         this.props.mode = 'img';
 
@@ -125,6 +237,14 @@ export class Spectrometer extends NodeDiv {
         this.canvas.style.height = this.img.style.height;
         // this.offscreen.height = this.canvas.height;
         // this.offscreen.width = this.canvas.width;
+    }
+
+    
+
+    handleFileInput = (ev) => {
+        //read file, handle if image, video, or error
+        let file = ev.target.value;
+        
     }
 
     inputImgUrl() {
@@ -200,6 +320,9 @@ export class Spectrometer extends NodeDiv {
             
             this.props.picked.x0 = ev.pageX - this.canvas.offsetLeft;
             this.props.picked.y0 = ev.pageY - this.canvas.offsetTop;
+
+            this.props.picked.x1 = undefined;
+            this.props.picked.y1 = undefined;
 
             this.drawCircle(this.props.picked.x0, this.props.picked.y0, 2.5, 'orange', 1, 'orange'); //show targeted point
             
@@ -292,7 +415,7 @@ export class Spectrometer extends NodeDiv {
         console.log(xintmax);
         this.graphctx.fillStyle = 'white';
 
-        this.graphctx.fillText(`X-axis Intensity Chart (spectrogram). Pixel width: ${img.width}, height: ${img.height}`,10,10,300);
+        this.graphctx.fillText(`Spectrogram pixel width: ${img.width}, height: ${img.height}`,10,10,300);
 
         this.graphctx.strokeStyle = 'white';
         this.graphctx.lineWidth = 2;
@@ -397,10 +520,10 @@ export class Spectrometer extends NodeDiv {
             if(!this.video.src) return;
 
             let pickedArea = {
-                x0:this.video.videoWidth*this.props.picked.x0/this.canvas.width,
-                y0:(this.video.videoHeight + 0.5*(this.canvas.height - this.canvas.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y0/this.canvas.height,
-                x1:this.video.videoWidth*this.props.picked.x1/this.canvas.width,
-                y1:(this.video.videoHeight + 0.5*(this.canvas.height - this.canvas.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y1/this.canvas.height
+                x0:(this.video.videoWidth)*this.props.picked.x0/this.canvas.width - this.video.offsetLeft,
+                y0:(this.video.videoHeight + 0.5*(this.video.height - this.video.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y0/this.canvas.height - this.video.offsetTop,
+                x1:this.video.videoWidth*this.props.picked.x1/this.canvas.width - this.video.offsetLeft,
+                y1:(this.video.videoHeight + 0.5*(this.video.height - this.video.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y1/this.canvas.height - this.video.offsetTop
             };
 
             createImageBitmap(
@@ -414,85 +537,7 @@ export class Spectrometer extends NodeDiv {
         }
     }
 
-    //DOMElement custom callbacks:
-    oncreate=(props)=>{
-        this.canvas = this.querySelector('#picker');
-        this.img = this.querySelector('img');
-        this.video = this.querySelector('video');
-        this.select = this.querySelector('#imgselect');
-        this.capture = this.querySelector('#capture');
-        this.graph = this.querySelector('#graph');
 
-        this.select.onchange = (ev) => {
-            if(this.mode === 'img') this.useImage();
-        }
-        
-        this.querySelector('#webcam').onclick = this.useWebcam;
-        this.querySelector('#image').onclick = this.useImage;
-        this.querySelector('#setImgUrl').onclick = this.inputImgUrl;
-        this.querySelector('#setVideoUrl').onclick = this.inputVideoSrc;
-
-        if(props.width) {
-            this.canvas.width = props.width;
-            this.canvas.style.width = props.width;
-            this.video.width = props.width;
-            this.video.style.width = props.width;
-            this.img.width = props.width;
-            this.img.style.width = props.width;
-        }
-        if(props.height) {
-            this.canvas.height = props.height;
-            this.canvas.style.height = props.height;
-            this.video.height = props.height;
-            this.video.style.height = props.height;
-            this.img.height = props.height;
-            this.img.style.height = props.height;
-        }
-        if(props.style) {
-            this.canvas.style = props.style;
-            this.canvas.zIndex = 3;
-            this.video.style = props.style;
-            this.video.zIndex = 2;
-            this.img.style = props.style;
-            this.img.zIndex = 1;
-            setTimeout(()=>{
-                this.canvas.height = this.canvas.clientHeight;
-                this.canvas.width = this.canvas.clientWidth;
-                this.img.width = props.width;
-                this.img.height = props.height;
-                this.video.width = props.width;
-                this.video.height = props.height;
-            },10); //slight recalculation delay time
-        }
-
-        
-        // this.offscreen.height = this.canvas.height;
-        // this.offscreen.width = this.canvas.width;
-
-        props.canvas = this.canvas;
-        if(props.context) props.context = this.canvas.getContext(props.context);
-        else props.context = this.canvas.getContext('2d');
-        this.context = props.context;
-        this.ctx = this.context;
-        props.ctx = this.context;
-
-
-        this.offscreen = new OffscreenCanvas(this.canvas.width,this.canvas.height);
-        this.offscreenctx = this.offscreen.getContext('2d');
-        
-        this.capturectx = this.capture.getContext('2d');
-        this.graphctx = this.capture.getContext('2d');
-
-        this.useImage();
-
-        this.props.picked.x1 = this.canvas.width;
-        this.props.picked.y1 = this.canvas.height;
-
-        this.canvas.onclick = this.canvasClicked;
-
-        setTimeout(()=>{if(props.animate) props.node.runAnimation();},10)
-
-    }
 
     //after rendering
     onresize=(props)=>{
@@ -501,6 +546,14 @@ export class Spectrometer extends NodeDiv {
             this.canvas.height = this.canvas.clientHeight;
             this.canvas.style.width = this.canvas.clientWidth;
             this.canvas.style.height = this.canvas.clientHeight;
+            this.img.width = this.img.clientWidth;
+            this.img.height = this.img.clientHeight;
+            this.img.style.width = this.img.clientWidth;
+            this.img.style.height = this.img.clientHeight;
+            this.video.width = this.video.clientWidth;
+            this.video.height = this.video.clientHeight;
+            this.video.style.width = this.video.clientWidth;
+            this.video.style.height = this.video.clientHeight;
         }
     } //on window resize
     //onchanged=(props)=>{} //on props changed
