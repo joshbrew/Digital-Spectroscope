@@ -6,7 +6,8 @@ let component = require('./spectrometer.node.html');
 /*
     Make rectangle dynamically resizable (can use an invisible element overlay to be lazy).
     
-    Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis.
+    Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis. 
+    2 tags on the endpoints where you can set the wavelength manually, then you can drag them to squish/stretch the x-axis to set the wavelength values for each y. 
 
     CSV of raw data & summary.
 
