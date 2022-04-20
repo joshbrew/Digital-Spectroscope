@@ -196,7 +196,7 @@ export class Spectrometer extends NodeDiv {
     drawFuncs = []; // draw(input,node,origin,cmd){} <--- passes operator args
     
     useWebcam = () => {
-
+        this.props.running = false;
         this.img.style.display = 'none';
         this.video.style.display = '';
 
@@ -222,6 +222,7 @@ export class Spectrometer extends NodeDiv {
     }
 
     useImage = () => {
+        this.props.running = false;
         if(this.video.src) {
             this.video.pause();;
             this.video.src = '';
@@ -242,12 +243,14 @@ export class Spectrometer extends NodeDiv {
     
 
     handleFileInput = (ev) => {
+        this.props.running = false;
         //read file, handle if image, video, or error
         let file = ev.target.value;
         
     }
 
     inputImgUrl() {
+        this.props.running = false;
         let input = this.querySelector('#imgurl').value;
         if(input) {
             if(this.video.src) {
@@ -268,7 +271,9 @@ export class Spectrometer extends NodeDiv {
         }
     }
 
+    //should combine inputs and just read the file type
     inputVideoSrc() {
+        this.props.running = false;
         this.img.style.display = 'none';
         this.video.style.display = '';
         
@@ -315,6 +320,7 @@ export class Spectrometer extends NodeDiv {
     }
 
     canvasClicked = (ev) => {
+        this.props.running = false;
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
         if(this.props.picking === 0) {
             
@@ -382,7 +388,7 @@ export class Spectrometer extends NodeDiv {
         this.bitmap = this.capturectx.getImageData(0,0,this.capture.width,this.capture.height);
 
         let bitarr = Array.from(this.bitmap.data);
-        console.log(bitarr)
+        //console.log(bitarr)
 
         //intensities along the x axis (summing the y column image data)
         let xintensities = [];
@@ -412,7 +418,7 @@ export class Spectrometer extends NodeDiv {
         }
 
         let xintmax = Math.max(...xintensities);
-        console.log(xintmax);
+        //console.log(xintmax);
         this.graphctx.fillStyle = 'white';
 
         this.graphctx.fillText(`Spectrogram pixel width: ${img.width}, height: ${img.height}`,10,10,300);
@@ -431,6 +437,12 @@ export class Spectrometer extends NodeDiv {
             }
         });
 
+        let xrintmax = Math.max(...xrgbintensities.map((x) => {return x.r}));
+        let xbintmax = Math.max(...xrgbintensities.map((x) => {return x.b}));
+        let xgintmax = Math.max(...xrgbintensities.map((x) => {return x.g}));
+
+        let xrgbmax = Math.max(xrintmax,xbintmax,xgintmax);
+
         this.graphctx.stroke();
         
         this.graphctx.strokeStyle = 'tomato';
@@ -438,14 +450,13 @@ export class Spectrometer extends NodeDiv {
 
         this.graphctx.beginPath();
         
-        let xrintmax = Math.max(...xrgbintensities.map((x) => {return x.r}));
 
         xrgbintensities.forEach((yrgb,i) => {
             if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.r/xrintmax));
+                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.r/xrgbmax));
             }
             else {
-                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.r/xrintmax));
+                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.r/xrgbmax));
             }
         });
 
@@ -455,14 +466,13 @@ export class Spectrometer extends NodeDiv {
 
         this.graphctx.beginPath();
 
-        let xbintmax = Math.max(...xrgbintensities.map((x) => {return x.b}));
         
         xrgbintensities.forEach((yrgb,i) => {
             if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.b/xbintmax));
+                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.b/xrgbmax));
             }
             else {
-                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.b/xbintmax));
+                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.b/xrgbmax));
             }
         });
         
@@ -472,15 +482,14 @@ export class Spectrometer extends NodeDiv {
 
         this.graphctx.beginPath();
         
-        let xgintmax = Math.max(...xrgbintensities.map((x) => {return x.g}));
         
 
         xrgbintensities.forEach((yrgb,i) => {
             if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.g/xgintmax));
+                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.g/xrgbmax));
             }
             else {
-                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.g/xgintmax));
+                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.g/xrgbmax));
             }
         });
 
