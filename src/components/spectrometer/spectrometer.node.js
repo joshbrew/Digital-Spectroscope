@@ -2,6 +2,11 @@ import {NodeDiv} from '../acyclicgraph/graph.node'
 
 let component = require('./spectrometer.node.html');
 
+//todo:
+/*
+    Make rectangle dynamically resizable (can use an invisible element overlay to be lazy)
+*/
+
 //See: https://github.com/brainsatplay/domelement
 export class Spectrometer extends NodeDiv {
 
@@ -100,7 +105,7 @@ export class Spectrometer extends NodeDiv {
             else if(this.props.picked.y1 && this.props.picked.x1) {
                 this.props.running = true;
                 let anim = () => {
-                    if(!this.props.running) return;
+                    if(!this.props.running || !(this.props.picked.y1 && this.props.picked.x1)) return;
                     this.canvasCapture();
 
                     setTimeout(()=>{
@@ -173,7 +178,6 @@ export class Spectrometer extends NodeDiv {
         this.capturectx = this.capture.getContext('2d');
         this.graphctx = this.capture.getContext('2d');
 
-        this.useImage();
 
         this.props.picked.x1 = this.canvas.width;
         this.props.picked.y1 = this.canvas.height;
@@ -181,6 +185,12 @@ export class Spectrometer extends NodeDiv {
         this.canvas.onclick = this.canvasClicked;
 
         setTimeout(()=>{if(props.animate) props.node.runAnimation();},10)
+        
+        try{
+            this.useImage();
+        } catch(er) {
+            console.error(er);
+        }
 
     }
 
