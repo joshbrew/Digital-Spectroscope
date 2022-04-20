@@ -9,6 +9,8 @@ let component = require('./spectrometer.node.html');
     Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis. 
     2 tags on the endpoints where you can set the wavelength manually, then you can drag them to squish/stretch the x-axis to set the wavelength values for each y. 
 
+    Hook up file input, merge video/image url inputs
+
     CSV of raw data & summary.
 
     Save the image snip made with the chart.
@@ -16,6 +18,12 @@ let component = require('./spectrometer.node.html');
     Build a log of the images in memory/indexeddb and a quick comparison feature. Visual confirmation can be quicker than data driven analysis in the field!
 
     Web hooks/sockets for passing data to/from the classifier model. Keep this super general so we can start to identify all kinds of materials!
+
+
+    Bugs:
+    Video snip proportions are still a little off
+    
+
 */
 
 //See: https://github.com/brainsatplay/domelement
