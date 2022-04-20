@@ -19,6 +19,7 @@ let component = require('./spectrometer.node.html');
 
     Web hooks/sockets for passing data to/from the classifier model. Keep this super general so we can start to identify all kinds of materials!
 
+    Style, accounting for all of the above
 
     Bugs:
     Video snip proportions are still a little off
