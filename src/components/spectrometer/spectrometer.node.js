@@ -336,10 +336,10 @@ export class Spectrometer extends NodeDiv {
             if(!this.video.src) return;
 
             let pickedArea = {
-                x0:this.video.videoWidth*this.props.picked.x0/this.canvas.width + (this.canvas.width - this.video.videoWidth),
-                y0:this.video.videoHeight*this.props.picked.y0/this.canvas.height + (this.canvas.height - this.video.videoHeight),
-                x1:this.video.videoWidth*this.props.picked.x1/this.canvas.width  + (this.canvas.width - this.video.videoWidth),
-                y1:this.video.videoHeight*this.props.picked.y1/this.canvas.height + (this.canvas.height - this.video.videoHeight)
+                x0:this.video.videoWidth*this.props.picked.x0/this.canvas.width,
+                y0:(this.video.videoHeight + 0.5*(this.canvas.height - this.canvas.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y0/this.canvas.height,
+                x1:this.video.videoWidth*this.props.picked.x1/this.canvas.width,
+                y1:(this.video.videoHeight + 0.5*(this.canvas.height - this.canvas.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y1/this.canvas.height
             };
 
             createImageBitmap(
