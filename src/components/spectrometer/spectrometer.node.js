@@ -433,7 +433,7 @@ export class Spectrometer extends NodeDiv {
         //console.log(xintmax);
         this.graphctx.fillStyle = 'white';
 
-        this.graphctx.fillText(`Spectrogram pixel width: ${img.width}, height: ${img.height}`,10,10,300);
+        this.querySelector('#captureheader').innerHTML = `Result: Spectrogram pixel width: ${img.width}, height: ${img.height}`;
 
         this.graphctx.strokeStyle = 'white';
         this.graphctx.lineWidth = 2;
