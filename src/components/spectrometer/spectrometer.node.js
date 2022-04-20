@@ -89,7 +89,10 @@ export class Spectrometer extends NodeDiv {
         this.video.style.display = '';
 
         if(navigator.getUserMedia) {
-            navigator.getUserMedia({video:true},(stream) => {
+            navigator.getUserMedia(
+                {
+                    video:true
+                },(stream) => {
                 this.video.srcObject = stream;
                 this.video.play();
                 this.video.width = this.canvas.width;
@@ -225,6 +228,7 @@ export class Spectrometer extends NodeDiv {
             this.ctx.stroke();
    
             this.canvasCapture(ev); //new rectangle, capture new image
+
         }
         
     }
@@ -312,16 +316,16 @@ export class Spectrometer extends NodeDiv {
             if(!this.img.src) return;
             
             let pickedArea = { //project the canvas rectangle pick coordinates into the image 
-                x0:this.img.width * this.props.picked.x0/this.canvas.width,
-                y0:this.img.height * this.props.picked.y0/this.canvas.height,
-                x1:this.img.width * this.props.picked.x1/this.canvas.width,
-                y1:this.img.height * this.props.picked.y1/this.canvas.height
+                x0:this.img.naturalWidth * this.props.picked.x0/this.canvas.width,
+                y0:this.img.naturalHeight * this.props.picked.y0/this.canvas.height,
+                x1:this.img.naturalWidth * this.props.picked.x1/this.canvas.width,
+                y1:this.img.naturalHeight * this.props.picked.y1/this.canvas.height
             };
 
             createImageBitmap(
                 this.img, 
-                pickedArea.x0 - this.img.offsetLeft,
-                pickedArea.y0 - this.img.offsetTop, 
+                pickedArea.x0,
+                pickedArea.y0, 
                 pickedArea.x1-pickedArea.x0,
                 pickedArea.y1-pickedArea.y0
             ).then(this.processCapture);
@@ -332,18 +336,19 @@ export class Spectrometer extends NodeDiv {
             if(!this.video.src) return;
 
             let pickedArea = {
-                x0:this.video.width*this.props.picked.x0/this.canvas.width,
-                y0:this.video.height*this.props.picked.y0/this.canvas.height,
-                x1:this.video.width*this.props.picked.x1/this.canvas.width,
-                y1:this.video.height*this.props.picked.y1/this.canvas.height
+                x0:this.video.videoWidth*this.props.picked.x0/this.canvas.width + (this.canvas.width - this.video.videoWidth),
+                y0:this.video.videoHeight*this.props.picked.y0/this.canvas.height + (this.canvas.height - this.video.videoHeight),
+                x1:this.video.videoWidth*this.props.picked.x1/this.canvas.width  + (this.canvas.width - this.video.videoWidth),
+                y1:this.video.videoHeight*this.props.picked.y1/this.canvas.height + (this.canvas.height - this.video.videoHeight)
             };
 
             createImageBitmap(
                 this.video,
-                pickedArea.x0 - this.img.offsetLeft,
-                pickedArea.y0 - this.img.offsetTop, 
+                pickedArea.x0,
+                pickedArea.y0, 
                 pickedArea.x1-pickedArea.x0,
                 pickedArea.y1-pickedArea.y0
+
             ).then(this.processCapture);
         }
     }
