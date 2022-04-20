@@ -2,11 +2,19 @@ import {NodeDiv} from '../acyclicgraph/graph.node'
 
 let component = require('./spectrometer.node.html');
 
-//todo:
+//TODO:
 /*
-    Make rectangle dynamically resizable (can use an invisible element overlay to be lazy)
+    Make rectangle dynamically resizable (can use an invisible element overlay to be lazy).
     
-    Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis
+    Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis.
+
+    CSV of raw data & summary.
+
+    Save the image snip made with the chart.
+
+    Build a log of the images in memory/indexeddb and a quick comparison feature. Visual confirmation can be quicker than data driven analysis in the field!
+
+    Web hooks/sockets for passing data to/from the classifier model. Keep this super general so we can start to identify all kinds of materials!
 */
 
 //See: https://github.com/brainsatplay/domelement
