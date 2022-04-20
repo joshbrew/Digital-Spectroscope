@@ -175,6 +175,7 @@ export class Spectrometer extends NodeDiv {
         ctx.fill();
         ctx.lineWidth = strokewidth;
         ctx.strokeStyle = strokestyle;
+        ctx.closePath();
         ctx.stroke();
     }
 
@@ -223,6 +224,9 @@ export class Spectrometer extends NodeDiv {
             this.props.picking = 0;
 
             this.ctx.lineWidth = 3;
+        
+            this.ctx.beginPath();
+            
             this.ctx.strokeStyle = 'orange';
             this.ctx.rect(this.props.picked.x0,this.props.picked.y0,this.props.picked.x1-this.props.picked.x0,this.props.picked.y1-this.props.picked.y0);
             this.ctx.stroke();
@@ -263,40 +267,97 @@ export class Spectrometer extends NodeDiv {
 
         let x = 0;
 
+        //srgb format
         for(let i = 0; i < bitarr.length; i+=4) {
             if((i/4) % img.width === 0) x = 0;
 
             if(!xintensities[x]) {
-                xintensities[x] = (bitarr[i+1]+bitarr[i+2]+bitarr[i+3]);
+                xintensities[x] = parseFloat(bitarr[i]+bitarr[i+1]+bitarr[i+2]);
                 xrgbintensities[x] = {
-                    r:bitarr[i+1],
-                    g:bitarr[i+2],
-                    b:bitarr[i+3]
+                    r:parseFloat(bitarr[i]),
+                    g:parseFloat(bitarr[i+1]),
+                    b:parseFloat(bitarr[i+2])
                 }
             }
             else {
-                xintensities[x] += (bitarr[i+1]+bitarr[i+2]+bitarr[i+3]);
-                xrgbintensities[x].r += bitarr[i+1];
-                xrgbintensities[x].g += bitarr[i+2];
-                xrgbintensities[x].b += bitarr[i+3];
+                xintensities[x] += parseFloat(bitarr[i]+bitarr[i+1]+bitarr[i+2]);
+                xrgbintensities[x].r += parseFloat(bitarr[i]);
+                xrgbintensities[x].g += parseFloat(bitarr[i+1]);
+                xrgbintensities[x].b += parseFloat(bitarr[i+2]);
             }
             x++;
         }
 
-        let xintmax = Math.max(...xintensities.map((x) => {if(!typeof x !== 'number') { return parseFloat(x);}}));
+        let xintmax = Math.max(...xintensities);
         console.log(xintmax);
         this.graphctx.fillStyle = 'white';
 
-        this.graphctx.fillText(`Max summed value: ${xintmax}`,10,10,100);
+        this.graphctx.fillText(`X-axis Intensity Chart (spectrogram). Pixel width: ${img.width}, height: ${img.height}`,10,10,300);
 
-        this.graphctx.strokeStyle = 'orange';
+        this.graphctx.strokeStyle = 'white';
+        this.graphctx.lineWidth = 2;
 
+        this.graphctx.beginPath();
+        
         xintensities.forEach((y,i) => {
             if(i === 0) {
                 this.graphctx.moveTo(0,this.graph.height*(1-y/xintmax));
             }
             else {
                 this.graphctx.lineTo(i,this.graph.height*(1-y/xintmax));
+            }
+        });
+
+        this.graphctx.stroke();
+        
+        this.graphctx.strokeStyle = 'tomato';
+        this.graphctx.lineWidth = 1;
+
+        this.graphctx.beginPath();
+        
+        let xrintmax = Math.max(...xrgbintensities.map((x) => {return x.r}));
+
+        xrgbintensities.forEach((yrgb,i) => {
+            if(i === 0) {
+                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.r/xrintmax));
+            }
+            else {
+                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.r/xrintmax));
+            }
+        });
+
+        this.graphctx.stroke();
+        
+        this.graphctx.strokeStyle = 'royalblue';
+
+        this.graphctx.beginPath();
+
+        let xbintmax = Math.max(...xrgbintensities.map((x) => {return x.b}));
+        
+        xrgbintensities.forEach((yrgb,i) => {
+            if(i === 0) {
+                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.b/xbintmax));
+            }
+            else {
+                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.b/xbintmax));
+            }
+        });
+        
+        this.graphctx.stroke();
+        
+        this.graphctx.strokeStyle = 'chartreuse';
+
+        this.graphctx.beginPath();
+        
+        let xgintmax = Math.max(...xrgbintensities.map((x) => {return x.g}));
+        
+
+        xrgbintensities.forEach((yrgb,i) => {
+            if(i === 0) {
+                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.g/xgintmax));
+            }
+            else {
+                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.g/xgintmax));
             }
         });
 
