@@ -3,6 +3,7 @@ const assets = [
   "/",
   "/index.html",
   "/dist/index.js",
+  "/src/assets/square.png",
   "/src/assets/spectrum1.png"
 ];
 

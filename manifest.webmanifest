@@ -5,9 +5,15 @@
     "display": "standalone",
     "theme_color": "#000000",
     "background_color": "#ffffff",
+    "orientation": "portrait-primary",
     "description": "Use your webcam as a digital spectroscope!",
     "lang": "en-US",
     "permissions": [
       "storage"
-    ]
+    ],
+    "icons":[{
+      "src": "/node_server/pwa/square.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    }]
   }
