@@ -12,7 +12,7 @@
       "storage"
     ],
     "icons":[{
-      "src": "/node_server/pwa/square.png",
+      "src": "/src/assets/square.png",
       "type": "image/png",
       "sizes": "256x256"
     }]
