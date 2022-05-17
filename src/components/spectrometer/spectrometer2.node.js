@@ -460,6 +460,8 @@ export class Spectrometer extends NodeDiv {
                 this.continuousCapture(this.video); 
             }
             else {
+                this.capture.width = Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
+                this.capture.height = Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
                 drawImage(
                     this.capturectx,
                     this.img,
