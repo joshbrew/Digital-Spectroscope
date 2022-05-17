@@ -21,7 +21,7 @@ require('esbuild').build({
     let data = fs.readFileSync('dist/index.js').toString();
 
     fs.writeFileSync(
-      'dist/app.html',`
+      'dist/index.html',`
         <!DOCTYPE html>
         <html>
           <head>
