@@ -3,7 +3,7 @@ const config = {
     "entryPoints": [
       "src/app.js"
     ],
-    "outfile": "dist/app",
+    "outfile": "dist/index",
     "bundleBrowser": true,
     "bundleESM": false,
     "bundleTypes": false,

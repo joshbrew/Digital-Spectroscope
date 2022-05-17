@@ -9,7 +9,7 @@ console.time('esbuild')
 require('esbuild').build({
     entryPoints: [entryPoint],
     bundle: true,
-    outfile: 'dist/app.js',
+    outfile: 'dist/index.js',
     target: "es2020",
     loader: {
 			'.html': 'text'
@@ -18,7 +18,7 @@ require('esbuild').build({
 		sourcemap: true,
   }).then((res) => {
     
-    let data = fs.readFileSync('dist/app.js').toString();
+    let data = fs.readFileSync('dist/index.js').toString();
 
     fs.writeFileSync(
       'dist/app.html',`
