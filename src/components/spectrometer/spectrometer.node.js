@@ -112,19 +112,15 @@ export class Spectrometer extends NodeDiv {
         this.img = this.querySelector('img');
 
         this.img.addEventListener('load', (ev)=>{
-            this.canvas.width = this.img.width;
-            this.canvas.style.width = this.img.width;
-            this.canvas.height = this.img.height;
-            this.canvas.style.height = this.img.height;
+            this.props.mode = 'img'
+            this.onresize()
         })
 
         this.video = this.querySelector('video');
 
         this.video.addEventListener('load', (ev)=>{
-            this.canvas.width = this.video.width;
-            this.canvas.style.width = this.video.width;
-            this.canvas.height = this.video.height;
-            this.canvas.style.height = this.video.height;
+            this.props.mode = 'vid'
+            this.onresize()
         })
 
         this.select = this.querySelector('#imgselect');
@@ -241,23 +237,26 @@ export class Spectrometer extends NodeDiv {
 
         this.props.picked.x0 = 0;
         this.props.picked.y0 = 0;
-
-        this.props.picked.x1 = this.canvas.width;
-        this.props.picked.y1 = this.canvas.height;
-
         this.canvas.onclick = this.canvasClicked;
 
         setTimeout(()=>{
             if(props.animate) props.node.runAnimation();
         },10)
-        
+
+
         try{
             this.useImage();
         } catch(er) {
             console.error(er);
         }
 
-        this.onresize() // RESIZE AT BEGINNING
+        this.img.width = 0
+        setTimeout(() => {
+            this.onresize() // RESIZE WHEN INITIALIZED
+            this.props.picked.x1 = this.canvas.width;
+            this.props.picked.y1 = this.canvas.height;
+            
+        }, 50)
 
     }
 
@@ -305,14 +304,7 @@ export class Spectrometer extends NodeDiv {
         this.props.mode = 'img';
 
 
-        // this.canvas.height = this.img.height;
-        // this.canvas.width = this.img.width;
-        // //this.canvas.width = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
-        // this.canvas.style.width = this.img.style.width;
-        // this.canvas.style.height = this.img.style.height;
-        //this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
-        // this.offscreen.height = this.canvas.height;
-        // this.offscreen.width = this.canvas.width;
+        this.onresize()
     }
 
     inputImgUrl() {
@@ -328,14 +320,7 @@ export class Spectrometer extends NodeDiv {
             this.img.style.display = '';
             this.props.mode = 'img';
     
-            // this.canvas.height = this.img.height;
-            // this.canvas.width = this.img.width;
-            // //this.canvas.width =  this.img.width * this.img.naturalHeight/this.img.naturalWidth;
-            // this.canvas.style.width = this.img.style.width;
-            // this.canvas.style.height = this.img.style.height;
-            //this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
-            // this.offscreen.height = this.canvas.height;
-            // this.offscreen.width = this.canvas.width;
+           this.onresize()
         }
     }
 
@@ -351,14 +336,7 @@ export class Spectrometer extends NodeDiv {
             this.video.src = input;
             this.video.play();
             this.props.mode = 'video';
-            // this.canvas.height = this.video.height;
-            // this.canvas.width = this.video.width;
-            // //this.canvas.width = this.video.height * this.video.videoHeight/this.video.videoWidth;
-            // this.canvas.style.width = this.video.style.width;
-            // this.canvas.style.height = this.video.style.height;
-            //this.canvas.style.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
-            // this.offscreen.height = this.canvas.height;
-            // this.offscreen.width = this.canvas.width;
+            this.onresize()
         }
     }
 
@@ -582,24 +560,52 @@ export class Spectrometer extends NodeDiv {
         }
     }
 
+    correctForRatio = (el, desiredWidth, maxHeight, ratio) => {
+        // relative to height
+        if (desiredWidth * ratio > maxHeight) {
+            el.height = maxHeight
+            el.width = el.height / ratio
+            // el.removeAttribute('width')
+        } 
+        // relative to width
+        else {
+            el.width = desiredWidth
+            el.height = el.width * ratio
+
+            // el.removeAttribute('height')
+        }
+        // el.style.width = '100%'
+        // el.style.height = '100%'
+
+    }
+
     //after rendering
     onresize=(props)=>{
 
         // Set image size
-        this.img.width = this.pickerDiv.offsetWidth
-        // this.img.height = this.pickerDiv.offsetHeight
+        const imageRatio = this.img.naturalHeight/this.img.naturalWidth;
+        const desiredWidth = this.pickerDiv.clientWidth
+
+        // Relative to Height
+        this.correctForRatio(this.img, desiredWidth, this.pickerDiv.clientHeight, imageRatio)
 
         if(this.canvas) {
             
+            // Match Image
             if(this.props.mode === 'img' && this.img?.naturalWidth > 0) {
-                this.canvas.height = this.img.parentNode.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
-                this.canvas.style.height = this.img.parentNode.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
-
-            } else if (this.props.mode === 'video' && this.video && this.video?.videoWidth > 0) {
+                console.log('IMG correct')
+                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio)
+            } 
+            
+            // Match Video
+            else if (this.props.mode === 'video' && this.video && this.video?.videoWidth > 0) {
                 this.canvas.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
-                this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                // this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                console.log('vid', this.canvas.height)
+            } 
 
-            } else {
+            // Fill Parent
+            else {
                 this.canvas.width = this.canvas.parentNode.clientWidth;
                 this.canvas.height = this.canvas.parentNode.clientHeight;
                 this.canvas.style.width = this.canvas.parentNode.clientWidth;

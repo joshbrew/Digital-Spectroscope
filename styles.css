@@ -11,11 +11,11 @@ spectrometer-node {
     height: 100%;
    display: grid;
    grid-template-columns: repeat(6,1fr);
-   grid-template-rows: 1fr min-content min-content;
+   grid-template-rows: 1fr min-content 1fr;
    grid-template-areas: 
    "picker picker picker capture capture capture"
    "controls controls controls controls controls controls"
-   "overlaid overlaid mini mini data data";
+   "compare compare captured captured saved saved";
    background: rgb(25,25,25);
 }
 
@@ -47,15 +47,21 @@ spectrometer-node {
     padding: 15px 25px;
 }
 
-#overlaid {
-    grid-area: overlaid;
+#compare {
+    color: white;
+    grid-area: compare;
+    padding: 25px;
 }
 
-#mini {
-    grid-area: mini;
+#captured {
+    color: white;
+    grid-area: captured;
+    padding: 25px;
 }
 
-#data {
-    grid-area: data;
+#saved {
+    color: white;
+    grid-area: saved;
+    padding: 25px;
 }
 
