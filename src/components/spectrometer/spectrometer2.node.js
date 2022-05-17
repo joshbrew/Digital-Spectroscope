@@ -241,7 +241,7 @@ export class Spectrometer extends NodeDiv {
                 this.video.srcObject = stream;
                 this.video.play();
                 this.video.width = this.canvas.width;
-                this.video.height = this.canvas.height;
+                this.video.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
                 this.props.mode = 'video';
                 //     this.canvas.height = this.video.height;
                 //     this.canvas.width = this.video.width;
