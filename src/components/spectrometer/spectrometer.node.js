@@ -105,10 +105,25 @@ export class Spectrometer extends NodeDiv {
     //DOMElement custom callbacks:
     oncreate=(props)=>{
         this.canvas = this.querySelector('#picker');
+        this.pickerDiv = this.querySelector('#pickerDiv');
+
         this.img = this.querySelector('img');
         this.video = this.querySelector('video');
         this.select = this.querySelector('#imgselect');
         this.capture = this.querySelector('#capture');
+
+        this.menu = this.querySelector('#menu');
+        this.toggleMenu = this.querySelector('#toggleMenu');
+        this.toggleMenu.style = `position: absolute; top: 25px; right: 25px;`
+        this.toggleMenu.onclick = () => {
+            if (this.menu.style.display === 'none') {
+                this.menu.style.display = ''
+            }
+            else {
+                this.menu.style.display = 'none'
+            }
+        }
+
         
         //fileinput
         this.querySelector('#fileinput').onchange = this.handleFileInput;
@@ -147,7 +162,7 @@ export class Spectrometer extends NodeDiv {
         this.querySelector('#animate').onclick = recordButton;
 
         this.select.onchange = (ev) => {
-            if(this.props.mode === 'img') this.useImage();
+            // if(this.props.mode === 'img') this.useImage();
         }
         
         this.querySelector('#webcam').onclick = this.useWebcam;
@@ -214,13 +229,17 @@ export class Spectrometer extends NodeDiv {
 
         this.canvas.onclick = this.canvasClicked;
 
-        setTimeout(()=>{if(props.animate) props.node.runAnimation();},10)
+        setTimeout(()=>{
+            if(props.animate) props.node.runAnimation();
+        },10)
         
         try{
             this.useImage();
         } catch(er) {
             console.error(er);
         }
+
+        this.onresize() // RESIZE AT BEGINNING
 
     }
 
@@ -265,6 +284,7 @@ export class Spectrometer extends NodeDiv {
         this.img.src = this.select.options[this.select.selectedIndex].value;
         this.img.style.display = '';
         this.props.mode = 'img';
+
 
         this.canvas.height = this.img.height;
         this.canvas.width = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
@@ -539,6 +559,11 @@ export class Spectrometer extends NodeDiv {
 
     //after rendering
     onresize=(props)=>{
+
+        // Set image size
+        this.img.width = this.pickerDiv.offsetWidth
+        // this.img.height = this.pickerDiv.offsetHeight
+
         if(this.canvas) {
             
             if(this.props.mode === 'img' && this.img) {

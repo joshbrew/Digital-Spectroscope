@@ -22,14 +22,16 @@ frame buffering stuff cuz graphs
 
 -->
 
-        <div> <!-- We want the source canvas to maintain the source image/video's aspect ratio so it looks correct, the capture can be stretched otherwise-->
-            <canvas id="picker" style="position:absolute; z-index:3; width:49.99%; height:25%;" ></canvas>
-            <img src="" style="position:absolute; z-index:1; width:49.99%; height:25%;" ></img>
-            <video src="" style="position:absolute; display:none; z-index:2; width:49.99%; height:25%;" ></video>
+        <div id="pickerDiv" style="position: relative;"> <!-- We want the source canvas to maintain the source image/video's aspect ratio so it looks correct, the capture can be stretched otherwise-->
+            <canvas id="picker" style="position: absolute; top: 0; z-index:3;" ></canvas>
+            <img src="" style="position: absolute; top: 0; z-index:1;" ></img>
+            <video src="" style="position: absolute; top: 0; display:none; z-index:2;" ></video>
         </div>
-        <canvas id="capture" style="position:absolute; left:50vw; z-index:11; width:49.99%; height:25%;"></canvas>
+        <div id="captureDiv"><canvas id="capture" style="z-index:11;"></canvas></div>
+        
+        <button id="toggleMenu">Toggle Menu</button>
 
-        <div id="menu" style="position:absolute; top:27.5%;">
+        <div id="menu" style="">
             <button id="snip">Analyze</button>
             <button id="animate">Record</button>
             <button id="webcam">Use Webcam</button>
@@ -50,9 +52,9 @@ frame buffering stuff cuz graphs
             <button id="fileinput">Load File</input>
             <span style="color:white;">Click to draw a rectangle around the portion of the image you want to analyze!</span>
         <hr>
-        <div width="45vw" height="60%" id="compare" style="overflow-y:scroll;">
+        <div  id="compare" style="overflow-y:scroll;">
         </div>
-        <div width="45vw" height="60%" id="captured" style="overflow-y:scroll;">
+        <div id="captured" style="overflow-y:scroll;">
         </div>
-        <div width="10vw" height="60%"  id="saved" style="overflow-y:scroll;">
+        <div id="saved" style="overflow-y:scroll;">
         </div>

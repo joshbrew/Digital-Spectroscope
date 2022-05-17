@@ -1,0 +1,61 @@
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+
+spectrometer-node {
+    width: 100%;
+    height: 100%;
+   display: grid;
+   grid-template-columns: repeat(6,1fr);
+   grid-template-rows: 1fr min-content min-content;
+   grid-template-areas: 
+   "picker picker picker capture capture capture"
+   "controls controls controls controls controls controls"
+   "overlaid overlaid mini mini data data";
+   background: rgb(25,25,25);
+}
+
+/* spectrometer-node > div {
+   
+} */
+
+
+#pickerDiv {
+    grid-area: picker;
+}
+
+#pickerDiv img {
+    /* width: 100%;
+    height: 100%; */
+}
+
+#captureDiv {
+    /* background: blue; */
+    grid-area: capture;
+    position: relative;
+}
+
+#menu {
+    background: rgb(10,10,10);
+    grid-area: controls;
+    position: relative;
+    transition: 0.5s;
+    padding: 15px 25px;
+}
+
+#overlaid {
+    grid-area: overlaid;
+}
+
+#mini {
+    grid-area: mini;
+}
+
+#data {
+    grid-area: data;
+}
+
