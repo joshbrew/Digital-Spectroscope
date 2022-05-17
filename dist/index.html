@@ -8,7 +8,7 @@
                 // Check that service workers are supported
                 if (process.env.NODE_ENV === 'production' && "serviceWorker" in navigator) addEventListener('load', () => {
                     navigator.serviceWorker
-                    .register("dist/service-worker.js")
+                    .register("./service-worker.js")
                     .catch((err) => console.log("Service worker registration failed", err));
                 });
             }
