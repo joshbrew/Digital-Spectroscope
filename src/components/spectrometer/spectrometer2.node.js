@@ -155,38 +155,38 @@ export class Spectrometer extends NodeDiv {
         this.querySelector('#setImgUrl').onclick = this.inputImgUrl;
         this.querySelector('#setVideoUrl').onclick = this.inputVideoSrc;
 
-        if(props.width) {
-            this.canvas.width = props.width;
-            this.canvas.style.width = props.width;
-            this.video.width = props.width;
-            this.video.style.width = props.width;
-            this.img.width = props.width;
-            this.img.style.width = props.width;
-        }
-        if(props.height) {
-            this.canvas.height = props.height;
-            this.canvas.style.height = props.height;
-            this.video.height = props.height;
-            this.video.style.height = props.height;
-            this.img.height = props.height;
-            this.img.style.height = props.height;
-        }
-        if(props.style) {
-            this.canvas.style = props.style;
-            this.canvas.zIndex = 3;
-            this.video.style = props.style;
-            this.video.zIndex = 2;
-            this.img.style = props.style;
-            this.img.zIndex = 1;
-            setTimeout(()=>{
-                this.canvas.height = this.canvas.clientHeight;
-                this.canvas.width = this.canvas.clientWidth;
-                this.img.width = props.width;
-                this.img.height = props.height;
-                this.video.width = props.width;
-                this.video.height = props.height;
-            },10); //slight recalculation delay time
-        }
+        // if(props.width) {
+        //     this.canvas.width = props.width;
+        //     this.canvas.style.width = props.width;
+        //     this.video.width = props.width;
+        //     this.video.style.width = props.width;
+        //     this.img.width = props.width;
+        //     this.img.style.width = props.width;
+        // }
+        // if(props.height) {
+        //     this.canvas.height = props.height;
+        //     this.canvas.style.height = props.height;
+        //     this.video.height = props.height;
+        //     this.video.style.height = props.height;
+        //     this.img.height = props.height;
+        //     this.img.style.height = props.height;
+        // }
+        // if(props.style) {
+        //     this.canvas.style = props.style;
+        //     this.canvas.zIndex = 3;
+        //     this.video.style = props.style;
+        //     this.video.zIndex = 2;
+        //     this.img.style = props.style;
+        //     this.img.zIndex = 1;
+        //     setTimeout(()=>{
+        //         this.canvas.height = this.canvas.clientHeight;
+        //         this.canvas.width = this.canvas.clientWidth;
+        //         this.img.width = props.width;
+        //         this.img.height = props.height;
+        //         this.video.width = props.width;
+        //         this.video.height = props.height;
+        //     },10); //slight recalculation delay time
+        // }
 
         
         // this.offscreen.height = this.canvas.height;
@@ -266,9 +266,9 @@ export class Spectrometer extends NodeDiv {
         this.props.mode = 'img';
 
         this.canvas.height = this.img.height;
-        this.canvas.width = this.img.width;
+        this.canvas.width = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
         this.canvas.style.width = this.img.style.width;
-        this.canvas.style.height = this.img.style.height;
+        this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
         // this.offscreen.height = this.canvas.height;
         // this.offscreen.width = this.canvas.width;
     }
@@ -287,9 +287,9 @@ export class Spectrometer extends NodeDiv {
             this.props.mode = 'img';
     
             this.canvas.height = this.img.height;
-            this.canvas.width = this.img.width;
+            this.canvas.width =  this.img.width * this.img.naturalHeight/this.img.naturalWidth;
             this.canvas.style.width = this.img.style.width;
-            this.canvas.style.height = this.img.style.height;
+            this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
             // this.offscreen.height = this.canvas.height;
             // this.offscreen.width = this.canvas.width;
         }
@@ -308,9 +308,9 @@ export class Spectrometer extends NodeDiv {
             this.video.play();
             this.props.mode = 'video';
             this.canvas.height = this.video.height;
-            this.canvas.width = this.video.width;
+            this.canvas.width = this.video.height * this.video.videoHeight/this.video.videoWidth;
             this.canvas.style.width = this.video.style.width;
-            this.canvas.style.height = this.video.style.height;
+            this.canvas.style.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
             // this.offscreen.height = this.canvas.height;
             // this.offscreen.width = this.canvas.width;
         }
@@ -539,28 +539,20 @@ export class Spectrometer extends NodeDiv {
     //after rendering
     onresize=(props)=>{
         if(this.canvas) {
-            this.img.width = this.img.clientWidth;
-            this.img.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
-            this.img.style.width = this.img.clientWidth;
-            this.img.style.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
-            this.video.width = this.video.clientWidth;
-            this.video.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
-            this.video.style.width = this.video.clientWidth;
-            this.video.style.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
-
+            
             if(this.props.mode === 'img' && this.img) {
-                this.canvas.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
-                this.canvas.style.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
+                this.canvas.height = this.img.parentNode.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
+                this.canvas.style.height = this.img.parentNode.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
 
             } else if (this.props.mode === 'video' && this.video) {
-                this.canvas.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
-                this.canvas.style.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                this.canvas.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
 
             } else {
-                this.canvas.width = this.canvas.clientWidth;
-                this.canvas.height = this.canvas.clientHeight;
-                this.canvas.style.width = this.canvas.clientWidth;
-                this.canvas.style.height = this.canvas.clientHeight;
+                this.canvas.width = this.canvas.parentNode.clientWidth;
+                this.canvas.height = this.canvas.parentNode.clientHeight;
+                this.canvas.style.width = this.canvas.parentNode.clientWidth;
+                this.canvas.style.height = this.canvas.parentNode.clientHeight;
             }
         }
     } //on window resize
