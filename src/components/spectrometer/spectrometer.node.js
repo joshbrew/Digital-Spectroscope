@@ -1,5 +1,7 @@
-import { imgOverlayPicker, getBMP, convertBMPToPNG, recordCanvas, drawImage, createBitmapCanvasWithMenu } from '../../utils/canvasMapping';
+import { imgOverlayPicker, getBMP, convertBMPToPNG, recordCanvas, drawImage } from '../../utils/canvasMapping';
+import { createBitmapCanvasWithMenu } from './spawned';
 import {NodeDiv} from '../acyclicgraph/graph.node'
+
 
 let component = require('./spectrometer.node.html');
 
@@ -261,10 +263,11 @@ export class Spectrometer extends NodeDiv {
                 this.video.srcObject = stream;
                 this.video.play();
                 this.video.width = this.canvas.width;
-                this.video.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
+                this.video.height = this.canvas.height;
+                //this.video.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
                 this.props.mode = 'video';
-                //     this.canvas.height = this.video.height;
-                //     this.canvas.width = this.video.width;
+                this.canvas.height = this.video.height;
+                this.canvas.width = this.video.width;
                 //     this.canvas.style.width = this.video.style.width;
                 //     this.canvas.style.height = this.video.style.height;
                 // this.offscreen.height = this.canvas.height;
@@ -287,9 +290,11 @@ export class Spectrometer extends NodeDiv {
 
 
         this.canvas.height = this.img.height;
-        this.canvas.width = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
+        this.canvas.width = this.img.width;
+        //this.canvas.width = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
         this.canvas.style.width = this.img.style.width;
-        this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
+        this.canvas.style.height = this.img.style.height;
+        //this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
         // this.offscreen.height = this.canvas.height;
         // this.offscreen.width = this.canvas.width;
     }
@@ -308,9 +313,11 @@ export class Spectrometer extends NodeDiv {
             this.props.mode = 'img';
     
             this.canvas.height = this.img.height;
-            this.canvas.width =  this.img.width * this.img.naturalHeight/this.img.naturalWidth;
+            this.canvas.width = this.img.width;
+            //this.canvas.width =  this.img.width * this.img.naturalHeight/this.img.naturalWidth;
             this.canvas.style.width = this.img.style.width;
-            this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
+            this.canvas.style.height = this.img.style.height;
+            //this.canvas.style.height = this.img.width * this.img.naturalHeight/this.img.naturalWidth;
             // this.offscreen.height = this.canvas.height;
             // this.offscreen.width = this.canvas.width;
         }
@@ -329,9 +336,11 @@ export class Spectrometer extends NodeDiv {
             this.video.play();
             this.props.mode = 'video';
             this.canvas.height = this.video.height;
-            this.canvas.width = this.video.height * this.video.videoHeight/this.video.videoWidth;
+            this.canvas.width = this.video.width;
+            //this.canvas.width = this.video.height * this.video.videoHeight/this.video.videoWidth;
             this.canvas.style.width = this.video.style.width;
-            this.canvas.style.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
+            this.canvas.style.height = this.video.style.height;
+            //this.canvas.style.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
             // this.offscreen.height = this.canvas.height;
             // this.offscreen.width = this.canvas.width;
         }
@@ -566,11 +575,11 @@ export class Spectrometer extends NodeDiv {
 
         if(this.canvas) {
             
-            if(this.props.mode === 'img' && this.img) {
+            if(this.props.mode === 'img' && this.img?.naturalWidth > 0) {
                 this.canvas.height = this.img.parentNode.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
                 this.canvas.style.height = this.img.parentNode.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
 
-            } else if (this.props.mode === 'video' && this.video) {
+            } else if (this.props.mode === 'video' && this.video && this.video?.videoWidth > 0) {
                 this.canvas.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
                 this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
 
