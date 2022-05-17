@@ -616,8 +616,8 @@ export async function createBitmapCanvasWithMenu(img, parentNode, w='320px', h='
             <button id='backup'>Backup</button>
             <button id='X'>X</button>
         </div>
-        <canvas id='capturecanvas' style='width:100%; height:100%; z-index:5;'></canvas>
-        <canvas id='graphcanvas' style='width:100%; height:100%; z-index:6;'></canvas>
+        <canvas id='capturecanvas' style='width:100%; height:100%;'></canvas>
+        <canvas id='graphcanvas' style='width:100%; height:100%;'></canvas>
     </div>`;
 
     if(typeof parentNode === 'string') {
