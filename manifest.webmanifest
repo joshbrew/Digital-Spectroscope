@@ -1,11 +1,11 @@
 {
-    "short_name": "PWA",
-    "name": "PWA",
+    "short_name": "Spectrometer PWA",
+    "name": "Spectrometer PWA",
     "start_url": ".",
     "display": "standalone",
     "theme_color": "#000000",
     "background_color": "#ffffff",
-    "description": "PWA Test",
+    "description": "Use your webcam as a digital spectroscope!",
     "lang": "en-US",
     "permissions": [
       "storage"

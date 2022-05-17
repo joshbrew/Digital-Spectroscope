@@ -1,3 +1,4 @@
+import { imgOverlayPicker, getBMP, convertBMPToPNG, recordCanvas, drawImage, createBitmapCanvasWithMenu } from '../../utils/canvasMapping';
 import {NodeDiv} from '../acyclicgraph/graph.node'
 
 let component = require('./spectrometer.node.html');
@@ -38,22 +39,24 @@ export class Spectrometer extends NodeDiv {
     offscreenctx;
     capture;
     capturectx;
-    graph;
-    graphctx;
     img; //img tag
     video; //video tag
     imgselect; //select options
-    framebuffers = {
-        capturess:[], //{capture.graph}
-        saved:[] //{capture,graph}
-    };
-    
+    captures = {};
+    loaded = {}; //loaded images and videos
+
+    //set the template string or function (which can input props to return a modified string)
+    template=component;
 
     props={
         picking:0,
         picked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
+        imgpicked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
         running:false,//running capture loop?
         mode:'img',
+        animation:(input,node,origin,cmd) => {
+
+        },
         operator:(
             input,
             node,
@@ -91,16 +94,13 @@ export class Spectrometer extends NodeDiv {
         delay:false, //ms delay to fire the node
         repeat:false, // set repeat as an integer to repeat the input n times
         recursive:false, //or set recursive with an integer to pass the output back in as the next input n times
-        animate:true, //true or false
+        animate:false, //true or false
         loop:undefined, //milliseconds or false
         tag:undefined, //generated if not specified, or use to get another node by tag instead of generating a new one
         input:undefined,// can set on the attribute etc
         graph:undefined, //parent AcyclicGraph instance, can set manually or via enclosing acyclic-graph div
         node:undefined //GraphNode instance, can set manually or as a string to grab a node by tag (or use tag)
     }; //can specify properties of the element which can be subscribed to for changes.
-
-    //set the template string or function (which can input props to return a modified string)
-    template=component;
 
     //DOMElement custom callbacks:
     oncreate=(props)=>{
@@ -109,41 +109,45 @@ export class Spectrometer extends NodeDiv {
         this.video = this.querySelector('video');
         this.select = this.querySelector('#imgselect');
         this.capture = this.querySelector('#capture');
-        this.graph = this.querySelector('#graph');
         
         //fileinput
         this.querySelector('#fileinput').onchange = this.handleFileInput;
 
-        this.querySelector('#snip').onclick = () => {
+        this.querySelector('#snip').onclick = (ev) => {
             if(this.props.picked.y1 && this.props.picked.x1) {
-                this.canvasCapture();
+                this.canvasCapture(ev);
             }
         }
 
 
-        this.querySelector('#animate').onclick = () => {
-            if(this.props.running) {
-                this.props.running = false;
-                this.querySelector('#animate').innerHTML = "Record";
-            }
-            else if(this.props.picked.y1 && this.props.picked.x1) {
+        const recordButton = () => {
+            if(this.props.mode === 'video' && this.props.picked.y1 && this.props.picked.x1) {
                 this.props.running = true;
-                let anim = () => {
-                    if(!this.props.running || !(this.props.picked.y1 && this.props.picked.x1)) return;
-                    this.canvasCapture();
 
-                    setTimeout(()=>{
-                        requestAnimationFrame(anim);
-                    },1000/60); //60fps hard cap
+                let mediaRecorder = recordCanvas(this.capture);
+                this.querySelector('#animate').innerHTML = "Recording...";
+                this.querySelector('#animate').onclick = () => {
+                    this.props.running = false;
+                    mediaRecorder.stop();
+                    this.querySelector('#animate').innerHTML = "Record";
+                    this.querySelector('#animate').onclick = recordButton;
                 }
-
-                anim();
-                this.querySelector('#animate').innerHTML = "Capturing";
+                
+                // let anim = () => {
+                //     if(!this.props.running || !(this.props.picked.y1 && this.props.picked.x1)) return;
+                //     this.canvasCapture();
+                //     setTimeout(()=>{
+                //         requestAnimationFrame(anim);
+                //     },1000/60); //60fps hard cap
+                // }
+                // anim()
             }
         }
+
+        this.querySelector('#animate').onclick = recordButton;
 
         this.select.onchange = (ev) => {
-            if(this.mode === 'img') this.useImage();
+            if(this.props.mode === 'img') this.useImage();
         }
         
         this.querySelector('#webcam').onclick = this.useWebcam;
@@ -200,8 +204,6 @@ export class Spectrometer extends NodeDiv {
         this.offscreenctx = this.offscreen.getContext('2d');
         
         this.capturectx = this.capture.getContext('2d');
-        this.graphctx = this.capture.getContext('2d');
-
 
         this.props.picked.x0 = 0;
         this.props.picked.y0 = 0;
@@ -221,17 +223,7 @@ export class Spectrometer extends NodeDiv {
 
     }
 
-    draw(input,node,origin,cmd) {
-        let canvas = this.props.canvas;
-        let ctx = this.props.ctx;
-    }
 
-    addDraw(f) {
-        if(typeof f === 'function') this.drawFuncs.push(f);
-    }
-
-    drawFuncs = []; // draw(input,node,origin,cmd){} <--- passes operator args
-    
     useWebcam = () => {
         this.props.running = false;
         this.img.style.display = 'none';
@@ -281,15 +273,6 @@ export class Spectrometer extends NodeDiv {
         // this.offscreen.width = this.canvas.width;
     }
 
-    
-
-    handleFileInput = (ev) => {
-        this.props.running = false;
-        //read file, handle if image, video, or error
-        let file = ev.target.value;
-        
-    }
-
     inputImgUrl() {
         this.props.running = false;
         let input = this.querySelector('#imgurl').value;
@@ -333,6 +316,47 @@ export class Spectrometer extends NodeDiv {
         }
     }
 
+    loadFile() {
+        var input = document.createElement('input');
+        input.accept = '.mp4,.png,.bmp,.jpg';
+        input.type = 'file';
+    
+        input.onchange = (e) => {
+            let file = e.target.files[0];
+
+            let dataurl = URL.createObjectURL(file);
+            
+            this.loaded[input.value] = dataurl;
+
+            if(this.video.src) {
+                this.video.pause();;
+                this.video.src = '';
+                this.video.style.display = 'none';
+            }
+            if(input.value.endsWith('.mp4')) {
+                this.props.mode = 'video';
+                this.video.src = dataurl;
+                this.video.play();
+            } else {
+                this.props.mode = 'img';
+                
+                if(input.value.endsWith('.bmp')) {
+                    var reader = new FileReader();  
+                    reader.onload = (e) => {
+                        var buffer = e.target.result;
+                        var bitmap = getBMP(buffer);
+                        let pngconverted = convertBMPToPNG(bitmap);
+                        this.img.src = pngconverted;
+                    }
+                    reader.readAsArrayBuffer(file);
+                }
+                else this.img.src = dataurl;
+            }
+
+        }
+        input.click();
+    }
+
             
     drawCircle(centerX, centerY, radius, fill='green', strokewidth=5, strokestyle='#003300', ctx=this.ctx) {
         ctx.beginPath();
@@ -360,6 +384,7 @@ export class Spectrometer extends NodeDiv {
         ctx.stroke();
     }
 
+
     canvasClicked = (ev) => {
         this.props.running = false;
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
@@ -370,6 +395,15 @@ export class Spectrometer extends NodeDiv {
 
             this.props.picked.x1 = undefined;
             this.props.picked.y1 = undefined;
+            let imgpicked; 
+            if(this.props.mode === 'img') imgpicked = imgOverlayPicker(this.img,this.canvas,this.props.picked.x0,this.props.picked.y0);
+            else if (this.props.mode === 'video') imgpicked = imgOverlayPicker(this.video,this.canvas,this.props.picked.x0,this.props.picked.y0);
+
+            this.props.imgpicked.x0 = imgpicked.x;
+            this.props.imgpicked.y0 = imgpicked.y;
+
+            this.props.imgpicked.x1 = undefined;
+            this.props.imgpicked.y1 = undefined;
 
             this.drawCircle(this.props.picked.x0, this.props.picked.y0, 2.5, 'orange', 1, 'orange'); //show targeted point
             
@@ -380,15 +414,28 @@ export class Spectrometer extends NodeDiv {
             this.props.picked.x1 = ev.pageX  - this.canvas.offsetLeft;
             this.props.picked.y1 = ev.pageY  - this.canvas.offsetTop;
 
+            let imgpicked;
+            if(this.props.mode === 'img') imgpicked = imgOverlayPicker(this.img,this.canvas,this.props.picked.x1,this.props.picked.y1);
+            else if (this.props.mode === 'video') imgpicked = imgOverlayPicker(this.video,this.canvas,this.props.picked.x1,this.props.picked.y1);
+
+            this.props.imgpicked.x1 = imgpicked.x;
+            this.props.imgpicked.y1 = imgpicked.y;
+            
             if(this.props.picked.x1 < this.props.picked.x0) {
                 let temp = this.props.picked.x1;
                 this.props.picked.x1 = this.props.picked.x0;
                 this.props.picked.x0 = temp;
+                temp = this.props.imgpicked.x1;
+                this.props.imgpicked.x1 = this.props.imgpicked.x0;
+                this.props.imgpicked.x0 = temp;
             }
             if(this.props.picked.y1 < this.props.picked.y0) {
                 let temp = this.props.picked.y1;
                 this.props.picked.y1 = this.props.picked.y0;
                 this.props.picked.y0 = temp;
+                temp = this.props.imgpicked.y1;
+                this.props.imgpicked.y1 = this.props.imgpicked.y0;
+                this.props.imgpicked.y0 = temp;
             }
 
             this.props.picking = 0;
@@ -398,150 +445,63 @@ export class Spectrometer extends NodeDiv {
             this.ctx.beginPath();
             
             this.ctx.strokeStyle = 'orange';
-            this.ctx.rect(this.props.picked.x0,this.props.picked.y0,this.props.picked.x1-this.props.picked.x0,this.props.picked.y1-this.props.picked.y0);
+            this.ctx.rect(
+                this.props.picked.x0,
+                this.props.picked.y0,
+                Math.abs(this.props.picked.x1-this.props.picked.x0),
+                Math.abs(this.props.picked.y1-this.props.picked.y0)
+            );
             this.ctx.stroke();
-   
-            this.canvasCapture(ev); //new rectangle, capture new image
+
+          
+            console.log(this.props.imgpicked)
+
+            if(this.props.mode === 'video') {
+                this.continuousCapture(this.video); 
+            }
+            else {
+                drawImage(
+                    this.capturectx,
+                    this.img,
+                    this.props.imgpicked.x0,
+                    this.props.imgpicked.y0,
+                    Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0),
+                    Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0),
+                    0,0,
+                    this.capture.width,
+                    this.capture.height
+                    )
+            }
 
         }
         
     }
 
+    //continuously draw the section of the video we're capturing.
+    continuousCapture(img) {
+        if(this.props.imgpicked.x1 && this.props.imgpicked.x0 && this.props.imgpicked.y1 && this.props.imgpicked.y0) {
+            this.capturectx.drawImage(
+                img,
+                this.props.imgpicked.x0, //srcrc
+                this.props.imgpicked.y0,
+                Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0),
+                Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0),
+                0,0,this.capturectx.width,this.capturectx.height //dest
+            );
+            this.continuousCapture(img);
+        }
+    }
+
+    
     processCapture = (img) => {
-            
-        //this.offscreen.width = img.width;
-        //this.offscreen.height = img.height;
-
-        //this.offscreenctx.drawImage(img,0,0);
-
-        this.capturectx.clearRect(0,0,this.capture.width,this.capture.height);
-        this.graphctx.fillStyle = 'gray'
-        this.graphctx.fillRect(0,0,this.graph.width,this.graph.height);
-
-        this.capture.width = img.width;
-        this.capture.height = img.height;
-        this.graph.width = img.width;
-        this.graph.height = img.height;
-        //clamp max height/width based on aspect?
-
-
-        this.capturectx.drawImage(img,0,0);
-
-        this.bitmap = this.capturectx.getImageData(0,0,this.capture.width,this.capture.height);
-
-        let bitarr = Array.from(this.bitmap.data);
-        //console.log(bitarr)
-
-        //intensities along the x axis (summing the y column image data)
-        let xintensities = [];
-        let xrgbintensities = [];
-
-        let x = 0;
-
-        //srgb format
-        for(let i = 0; i < bitarr.length; i+=4) {
-            if((i/4) % img.width === 0) x = 0;
-
-            if(!xintensities[x]) {
-                xintensities[x] = parseFloat(bitarr[i]+bitarr[i+1]+bitarr[i+2]);
-                xrgbintensities[x] = {
-                    r:parseFloat(bitarr[i]),
-                    g:parseFloat(bitarr[i+1]),
-                    b:parseFloat(bitarr[i+2])
-                }
-            }
-            else {
-                xintensities[x] += parseFloat(bitarr[i]+bitarr[i+1]+bitarr[i+2]);
-                xrgbintensities[x].r += parseFloat(bitarr[i]);
-                xrgbintensities[x].g += parseFloat(bitarr[i+1]);
-                xrgbintensities[x].b += parseFloat(bitarr[i+2]);
-            }
-            x++;
-        }
-
-        let xintmax = Math.max(...xintensities);
-        let xrintmax = Math.max(...xrgbintensities.map((x) => {return x.r}));
-        let xbintmax = Math.max(...xrgbintensities.map((x) => {return x.b}));
-        let xgintmax = Math.max(...xrgbintensities.map((x) => {return x.g}));
-
-        let xrgbmax = Math.max(xrintmax,xbintmax,xgintmax);
-        //console.log(xintmax);
-        this.graphctx.fillStyle = 'white';
-
-        //this.querySelector('#captureheader').innerHTML = `Result: Spectrogram pixel width: ${img.width}, height: ${img.height}`;
-
-        this.graphctx.strokeStyle = 'white';
-        this.graphctx.lineWidth = 2;
-
-        this.graphctx.beginPath();
-        
-        xintensities.forEach((y,i) => {
-            if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-y/xintmax));
-            }
-            else {
-                this.graphctx.lineTo(i,this.graph.height*(1-y/xintmax));
-            }
-        });
-
-
-        this.graphctx.stroke();
-        
-        this.graphctx.strokeStyle = 'tomato';
-        this.graphctx.lineWidth = 1;
-
-        this.graphctx.beginPath();
-        
-
-        xrgbintensities.forEach((yrgb,i) => {
-            if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.r/xrgbmax));
-            }
-            else {
-                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.r/xrgbmax));
-            }
-        });
-
-        this.graphctx.stroke();
-        
-        this.graphctx.strokeStyle = 'royalblue';
-
-        this.graphctx.beginPath();
-
-        
-        xrgbintensities.forEach((yrgb,i) => {
-            if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.b/xrgbmax));
-            }
-            else {
-                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.b/xrgbmax));
-            }
-        });
-        
-        this.graphctx.stroke();
-        
-        this.graphctx.strokeStyle = 'chartreuse';
-
-        this.graphctx.beginPath();
-        
-        
-
-        xrgbintensities.forEach((yrgb,i) => {
-            if(i === 0) {
-                this.graphctx.moveTo(0,this.graph.height*(1-yrgb.g/xrgbmax));
-            }
-            else {
-                this.graphctx.lineTo(i,this.graph.height*(1-yrgb.g/xrgbmax));
-            }
-        });
-
-        this.graphctx.stroke();
-        //update the plot from the bitmap
-        
-       // console.log(this.bitmap, xintensities, xrgbintensities);
-
- 
+        createBitmapCanvasWithMenu(
+            img,
+            this.querySelector('#captured'),
+            '49.99%',
+            '75px'
+        )
     }
+
 
     //pull the bitmap into canvas;
     canvasCapture(ev) {
@@ -550,19 +510,12 @@ export class Spectrometer extends NodeDiv {
 
             if(!this.img.src) return;
             
-            let pickedArea = { //project the canvas rectangle pick coordinates into the image 
-                x0:this.img.naturalWidth * this.props.picked.x0/this.canvas.width,
-                y0:this.img.naturalHeight * this.props.picked.y0/this.canvas.height,
-                x1:this.img.naturalWidth * this.props.picked.x1/this.canvas.width,
-                y1:this.img.naturalHeight * this.props.picked.y1/this.canvas.height
-            };
-
             createImageBitmap(
                 this.img, 
-                pickedArea.x0,
-                pickedArea.y0, 
-                pickedArea.x1-pickedArea.x0,
-                pickedArea.y1-pickedArea.y0
+                this.props.imgpicked.x0,
+                this.props.imgpicked.y0, 
+                Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0),
+                Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0)
             ).then(this.processCapture);
 
         }   
@@ -570,25 +523,16 @@ export class Spectrometer extends NodeDiv {
             
             if(!this.video.src) return;
 
-            let pickedArea = {
-                x0:(this.video.videoWidth)*this.props.picked.x0/this.canvas.width - this.video.offsetLeft,
-                y0:(this.video.videoHeight + 0.5*(this.video.height - this.video.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y0/this.canvas.height - this.video.offsetTop,
-                x1:this.video.videoWidth*this.props.picked.x1/this.canvas.width - this.video.offsetLeft,
-                y1:(this.video.videoHeight + 0.5*(this.video.height - this.video.height*(this.video.videoHeight/this.video.videoWidth)))*this.props.picked.y1/this.canvas.height - this.video.offsetTop
-            };
-
             createImageBitmap(
                 this.video,
-                pickedArea.x0,
-                pickedArea.y0, 
-                pickedArea.x1-pickedArea.x0,
-                pickedArea.y1-pickedArea.y0
+                this.props.imgpicked.x0,
+                this.props.imgpicked.y0, 
+                Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0),
+                Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0)
 
             ).then(this.processCapture);
         }
     }
-
-
 
     //after rendering
     onresize=(props)=>{
@@ -614,4 +558,3 @@ export class Spectrometer extends NodeDiv {
 //window.customElements.define('custom-', Custom);
 
 Spectrometer.addElement('spectrometer-node');
-

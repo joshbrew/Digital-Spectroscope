@@ -15,4 +15,4 @@ import './other/canvas/place.node.js';
 import './other/space/space.node.js';
 import './other/space/physicsbody.node.js';
 
-import './spectrometer/spectrometer.node'
+import './spectrometer/spectrometer2.node.js'
