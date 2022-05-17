@@ -1,7 +1,7 @@
 //https://github.com/ibrahima92/pwa-with-vanilla-js
 const assets = [
   "/",
-  "/index.html",
+  //"/index.html",
   //"/dist/index.js",
   "/src/assets/square.png",
   "/src/assets/spectrum1.png"

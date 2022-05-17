@@ -25,7 +25,6 @@
     "concurrently": "^7.1.0",
     "esbuild": "^0.14.34",
     "nodemon": "^2.0.15",
-    "workbox-cli": "^6.5.3",
     "ws": "^8.5.0"
   },
   "author": "Joshua Brewster",

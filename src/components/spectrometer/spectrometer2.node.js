@@ -287,7 +287,7 @@ export class Spectrometer extends NodeDiv {
             this.props.mode = 'img';
     
             this.canvas.height = this.img.height;
-            this.canvas.width = this.canvas.width;
+            this.canvas.width = this.img.width;
             this.canvas.style.width = this.img.style.width;
             this.canvas.style.height = this.img.style.height;
             // this.offscreen.height = this.canvas.height;
@@ -500,7 +500,7 @@ export class Spectrometer extends NodeDiv {
             img,
             this.querySelector('#captured'),
             '49.99%',
-            '75px'
+            '200px'
         )
     }
 
@@ -539,18 +539,29 @@ export class Spectrometer extends NodeDiv {
     //after rendering
     onresize=(props)=>{
         if(this.canvas) {
-            this.canvas.width = this.canvas.clientWidth;
-            this.canvas.height = this.canvas.clientHeight;
-            this.canvas.style.width = this.canvas.clientWidth;
-            this.canvas.style.height = this.canvas.clientHeight;
             this.img.width = this.img.clientWidth;
-            this.img.height = this.img.clientHeight;
+            this.img.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
             this.img.style.width = this.img.clientWidth;
-            this.img.style.height = this.img.clientHeight;
+            this.img.style.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
             this.video.width = this.video.clientWidth;
-            this.video.height = this.video.clientHeight;
+            this.video.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
             this.video.style.width = this.video.clientWidth;
-            this.video.style.height = this.video.clientHeight;
+            this.video.style.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
+
+            if(this.props.mode === 'img' && this.img) {
+                this.canvas.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
+                this.canvas.style.height = this.img.clientWidth * this.img.naturalHeight/this.img.naturalWidth;
+
+            } else if (this.props.mode === 'video' && this.video) {
+                this.canvas.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                this.canvas.style.height = this.video.clientWidth * this.video.videoHeight/this.video.videoWidth;
+
+            } else {
+                this.canvas.width = this.canvas.clientWidth;
+                this.canvas.height = this.canvas.clientHeight;
+                this.canvas.style.width = this.canvas.clientWidth;
+                this.canvas.style.height = this.canvas.clientHeight;
+            }
         }
     } //on window resize
     //onchanged=(props)=>{} //on props changed
