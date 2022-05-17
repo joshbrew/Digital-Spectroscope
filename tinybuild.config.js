@@ -15,7 +15,7 @@ const config = {
     "protocol": "http",
     "host": "localhost",
     "port": 8080,
-    "startpage": "spectrometer.html",
+    "startpage": "index.html",
     "socket_protocol": "ws",
     "hotreload": 5000,
     "pwa": "dist/service-worker.js",
