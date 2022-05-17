@@ -108,6 +108,7 @@ export class Spectrometer extends NodeDiv {
     oncreate=(props)=>{
         this.canvas = this.querySelector('#picker');
         this.pickerDiv = this.querySelector('#pickerDiv');
+        this.captureDiv = this.querySelector('#captureDiv');
 
         this.img = this.querySelector('img');
 
@@ -484,19 +485,7 @@ export class Spectrometer extends NodeDiv {
                 this.continuousCapture(this.video); 
             }
             else {
-                this.capture.width = Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
-                this.capture.height = Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
-                drawImage(
-                    this.capturectx,
-                    this.img,
-                    this.props.imgpicked.x0,
-                    this.props.imgpicked.y0,
-                    Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0),
-                    Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0),
-                    0,0,
-                    this.capture.width,
-                    this.capture.height
-                    )
+                this.onresize()
             }
 
         }
@@ -612,6 +601,21 @@ export class Spectrometer extends NodeDiv {
                 this.canvas.style.height = this.canvas.parentNode.clientHeight;
             }
         }
+
+        // Scale Capture
+        this.capture.width = this.captureDiv.clientWidth ; //Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
+        this.capture.height = this.captureDiv.clientHeight;  //Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
+        drawImage(
+            this.capturectx,
+            this.img,
+            this.props.imgpicked.x0,
+            this.props.imgpicked.y0,
+            Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0),
+            Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0),
+            0,0,
+            this.capture.width,
+            this.capture.height
+        )
     } //on window resize
     //onchanged=(props)=>{} //on props changed
     //ondelete=(props)=>{} //on element deleted. Can remove with this.delete() which runs cleanup functions
