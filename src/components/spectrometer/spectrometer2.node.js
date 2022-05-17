@@ -498,7 +498,7 @@ export class Spectrometer extends NodeDiv {
             img,
             this.querySelector('#captured'),
             '49.99%',
-            '75px'
+            '200px'
         )
     }
 
