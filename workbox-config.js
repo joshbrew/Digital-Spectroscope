@@ -17,6 +17,6 @@ module.exports = {
         options: { cacheName: "images" }
       }],
     maximumFileSizeToCacheInBytes: 10000000,
-    swDest: "dist/service-worker.js",
+    swDest: "service-worker.js",
     skipWaiting: true,
 };
