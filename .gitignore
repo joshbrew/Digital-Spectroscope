@@ -1,7 +1,3 @@
 node_modules
 node_server/ssl/cert.pem
 node_server/ssl/key.pem
-dist/service-worker.js
-dist/service-worker.js.map
-dist/workbox-8f4bcedb.js
-dist/workbox-8f4bcedb.js.map
