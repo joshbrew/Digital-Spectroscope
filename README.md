@@ -1,8 +1,9 @@
 # Minimal [esbuild](https://esbuild.github.io/getting-started/#your-first-bundle), [Nodejs](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Node_server_without_framework), and [Python Quart](https://pgjones.gitlab.io/quart/) concurrent test env.  
 
-Requires: Python 3.7 or later and NodeJS LTS or later
+To run:
+`tinybuild`
 
-![image](Capture.PNG)
+Or `npm i -g tinybuild` then the above command.
 
 This test runs a websocket and a thread on the [python](https://www.python.org/downloads/) quart server. You can access the Node-served test page at `http://localhost:8000` or the quart server test page at `http://localhost:7000` to experiment (add `/build` at port 7000 to access the node build (minus hot reload)). 
 
