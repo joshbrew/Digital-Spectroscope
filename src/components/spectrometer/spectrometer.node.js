@@ -154,6 +154,7 @@ export class Spectrometer extends NodeDiv {
         this.querySelector('#image').onclick = this.useImage;
         this.querySelector('#setImgUrl').onclick = this.inputImgUrl;
         this.querySelector('#setVideoUrl').onclick = this.inputVideoSrc;
+        this.querySelector('#fileinput').onclick = this.loadFile;
 
         // if(props.width) {
         //     this.canvas.width = props.width;
