@@ -4,14 +4,13 @@
         <style>
         </style>
         <script> //Service workers for pwa test.  `npm run pwa`
-            if(typeof process !== 'undefined') { //node environment variable in served code        
-                // Check that service workers are supported
-                if (process.env.NODE_ENV === 'production' && "serviceWorker" in navigator) addEventListener('load', () => {
-                    navigator.serviceWorker
-                    .register("dist/service-worker.js").then(()=>{console.log('PWA running')})
-                    .catch((err) => console.log("Service worker registration failed", err));
-                });
-            }
+
+            if ("serviceWorker" in navigator) addEventListener('load', () => {
+                navigator.serviceWorker
+                .register("dist/service-worker.js").then(()=>{console.log('PWA running')})
+                .catch((err) => console.log("Service worker registration failed", err));
+            });
+            
         </script>
         <script src="./dist/index.js" type="module"> </script>
     </head>
