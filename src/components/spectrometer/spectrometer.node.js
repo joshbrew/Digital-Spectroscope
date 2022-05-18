@@ -41,6 +41,9 @@ export class Spectrometer extends NodeDiv {
     offscreenctx;
     capture;
     capturectx;
+    capturegraph;
+    capturegraphctx;
+    graphVideoSnip = false;
     img; //img tag
     video; //video tag
     imgselect; //select options
@@ -55,6 +58,7 @@ export class Spectrometer extends NodeDiv {
         'Chicken Breast': 'src/assets/chickenbreast.png',
         'Brown Beer Bottle': 'src/assets/brownbeerbottle.png'
     }
+    comparing = {} //images being compared and their current settings
 
     //set the template string or function (which can input props to return a modified string)
     template=component;
@@ -122,6 +126,13 @@ export class Spectrometer extends NodeDiv {
         this.videomenu = this.querySelector('#videomenu');
         this.urlmenu = this.querySelector('#urlmenu');
         this.imgselect = this.querySelector('#imgselect');
+        this.select = this.querySelector('#imgselect');
+        this.capture = this.querySelector('#capture');
+        this.capturectx = this.capture.getContext('2d');
+        this.capturegraph = this.querySelector('#capturegraph');
+        this.capturegraphctx = this.capturegraph.getContext('2d');
+        this.menu = this.querySelector('#menu');
+        this.toggleMenu = this.querySelector('#toggleMenu');
 
         for(const key in this.imgfiles) {
             let template = `<option value="${this.imgfiles[key]}">${key}</option>`
@@ -148,6 +159,10 @@ export class Spectrometer extends NodeDiv {
                 instructionDiv.style.display = 'none';
         }
 
+        this.querySelector('#showgraph').onclick = () => { //live graph on video snip
+            this.graphVideoSnip = !this.graphVideoSnip;
+        }
+
         this.img = this.querySelector('img');
 
         this.img.addEventListener('load', (ev)=>{
@@ -171,11 +186,6 @@ export class Spectrometer extends NodeDiv {
             this.onresize();
         })
 
-        this.select = this.querySelector('#imgselect');
-        this.capture = this.querySelector('#capture');
-
-        this.menu = this.querySelector('#menu');
-        this.toggleMenu = this.querySelector('#toggleMenu');
         //this.toggleMenu.style = `position: absolute; bottom: 25px; right: 25px;`
         this.toggleMenu.onclick = () => {
             if (this.menu.style.display === 'none') {
@@ -250,7 +260,6 @@ export class Spectrometer extends NodeDiv {
         this.offscreen = new OffscreenCanvas(this.canvas.width,this.canvas.height);
         this.offscreenctx = this.offscreen.getContext('2d');
         
-        this.capturectx = this.capture.getContext('2d');
 
         this.canvas.onclick = this.canvasClicked;
 
@@ -274,11 +283,57 @@ export class Spectrometer extends NodeDiv {
     }
 
 
+    //after rendering
+    onresize=(props)=>{
+        // Set image size
+        let imageRatio;
+        const desiredWidth = this.pickerDiv.clientWidth;
+
+        // Relative to Height
+        if(this.props.mode === 'img') {
+            imageRatio = this.img.naturalHeight/this.img.naturalWidth;
+            this.correctForRatio(this.img, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
+        }
+        else if(this.props.mode === 'video') {
+            imageRatio = this.video.videoHeight/this.video.videoWidth;
+            this.correctForRatio(this.video, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
+        }
+        
+        if(this.canvas) {
+            
+            // Match Image
+            if(this.props.mode === 'img' && this.img?.naturalWidth > 0) {
+                //console.log('IMG correct')
+                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
+            } 
+            
+            // Match Video
+            else if (this.props.mode === 'video' && this.video && this.video?.videoWidth > 0) {
+                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
+                // this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                //console.log('vid', this.canvas.height)
+            } 
+
+            // Fill Parent
+            else {
+                this.canvas.width = this.canvas.parentNode.clientWidth;
+                this.canvas.height = this.canvas.parentNode.clientHeight;
+                this.canvas.style.width = this.canvas.parentNode.clientWidth;
+                this.canvas.style.height = this.canvas.parentNode.clientHeight;
+            }
+        }
+    } //on window resize
+    //onchanged=(props)=>{} //on props changed
+    //ondelete=(props)=>{} //on element deleted. Can remove with this.delete() which runs cleanup functions
+
+
     useWebcam = () => {
         this.props.running = false;
         this.img.style.display = 'none';
         if(this.video.src) {
-            this.video.pause();;
+            this.graphVideoSnip = false;
+            this.capturegraphctx.clearRect(0,0,this.capturegraph.width,this.capturegraph.height);
+            this.video.pause();
             this.video.src = '';
         }
         this.video.style.display = '';
@@ -307,8 +362,10 @@ export class Spectrometer extends NodeDiv {
 
     useImage = () => {
         this.props.running = false;
-        if(this.video.src) {
-            this.video.pause();;
+        if(this.video.src) {                
+            this.graphVideoSnip = false;
+            this.capturegraphctx.clearRect(0,0,this.capturegraph.width,this.capturegraph.height);
+            this.video.pause();
             this.video.src = '';
             this.video.style.display = 'none';
         }
@@ -325,7 +382,9 @@ export class Spectrometer extends NodeDiv {
         let input = this.querySelector('#urlinput').value;
         if(input) {
             if(this.video.src) {
-                this.video.pause();;
+                this.graphVideoSnip = false;
+                this.capturegraphctx.clearRect(0,0,this.capturegraph.width,this.capturegraph.height);
+                this.video.pause();
                 this.video.src = '';
                 this.video.style.display = 'none';
             }
@@ -342,10 +401,15 @@ export class Spectrometer extends NodeDiv {
         this.props.running = false;
         this.img.style.display = 'none';
         this.video.style.display = '';
-        
         let input = this.querySelector('#urlinput').value;
 
         if(input) {
+            if(this.video.src) {
+                this.graphVideoSnip = false;
+                this.capturegraphctx.clearRect(0,0,this.capturegraph.width,this.capturegraph.height);
+                this.video.pause();
+                this.video.src = '';
+            }
             this.video.src = input;
             this.video.play();
             this.props.mode = 'video';
@@ -365,7 +429,9 @@ export class Spectrometer extends NodeDiv {
             
             this.loaded[input.value] = dataurl;
 
-            if(this.video.src) {
+            if(this.video.src) {                
+                this.graphVideoSnip = false;
+                this.capturegraphctx.clearRect(0,0,this.capturegraph.width,this.capturegraph.height);
                 this.video.pause();;
                 this.video.src = '';
                 this.video.style.display = 'none';
@@ -519,7 +585,7 @@ export class Spectrometer extends NodeDiv {
     }
 
     //continuously draw the section of the video we're capturing.
-    continuousCapture(img) {
+    async continuousCapture(img) {
         if(this.props.imgpicked.x1 && this.props.imgpicked.x0 && this.props.imgpicked.y1 && this.props.imgpicked.y0) {
             this.capturectx.drawImage(
                 img,
@@ -529,18 +595,28 @@ export class Spectrometer extends NodeDiv {
                 Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0),
                 0,0,this.capture.width,this.capture.height //dest
             );
-            setTimeout(()=>{requestAnimationFrame(()=>{this.continuousCapture(img);})},33.3333);
+            if(this.graphVideoSnip) {
+                let imgdata = this.capturectx.getImageData(0,0,this.capture.width,this.capture.height);
+                let mapped = graphXintensities(
+                    this.capturectx,
+                    imgdata
+                );
+            }
+            setTimeout(()=>{requestAnimationFrame(async ()=>{this.continuousCapture(img);})},33.3333);
         }
     }
 
     
     processCapture = (img) => {
-        this.createBitmapCanvasWithMenu(
+        let capture = this.createBitmapCanvasWithMenu(
             img,
             this.querySelector('#captured'),
             '49.99%',
             '200px'
         )
+        if(capture.timestamp) {
+            this.captures[capture.timestamp] = capture;
+        }
     }
 
     
@@ -594,49 +670,6 @@ export class Spectrometer extends NodeDiv {
 
     }
 
-    //after rendering
-    onresize=(props)=>{
-        // Set image size
-        let imageRatio;
-        const desiredWidth = this.pickerDiv.clientWidth;
-
-        // Relative to Height
-        if(this.props.mode === 'img') {
-            imageRatio = this.img.naturalHeight/this.img.naturalWidth;
-            this.correctForRatio(this.img, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
-        }
-        else if(this.props.mode === 'video') {
-            imageRatio = this.video.videoHeight/this.video.videoWidth;
-            this.correctForRatio(this.video, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
-        }
-        
-        if(this.canvas) {
-            
-            // Match Image
-            if(this.props.mode === 'img' && this.img?.naturalWidth > 0) {
-                //console.log('IMG correct')
-                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
-            } 
-            
-            // Match Video
-            else if (this.props.mode === 'video' && this.video && this.video?.videoWidth > 0) {
-                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
-                // this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
-                //console.log('vid', this.canvas.height)
-            } 
-
-            // Fill Parent
-            else {
-                this.canvas.width = this.canvas.parentNode.clientWidth;
-                this.canvas.height = this.canvas.parentNode.clientHeight;
-                this.canvas.style.width = this.canvas.parentNode.clientWidth;
-                this.canvas.style.height = this.canvas.parentNode.clientHeight;
-            }
-        }
-    } //on window resize
-    //onchanged=(props)=>{} //on props changed
-    //ondelete=(props)=>{} //on element deleted. Can remove with this.delete() which runs cleanup functions
-
     async createBitmapCanvasWithMenu(img, parentNode, w='320px', h='180px') {
         let template = `
         <div style='width:${w}; height:${h};'>
@@ -667,19 +700,21 @@ export class Spectrometer extends NodeDiv {
             ctx.drawImage(img,0,0);
     
             let input = document.querySelector('#title');
-            console.log(img)
+            //console.log(img);
             let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
             let graph = document.querySelector('#graphcanvas');
             let mapped = graphXintensities(graph.getContext('2d'), bmp);
     
-            let capture= {
+            let capture = {
+                node:canvas.parentNode,
                 parentNode:parentNode,
                 width:img.width,
                 height:img.height,
                 canvas,
                 input,
+                timestamp:Date.now(),
                 mapped
-            }
+            };
     
             parentNode.querySelector('#toggledisplay').onclick = () => {
                 if(canvas.style.display == '' && graph.style.display == '') {
