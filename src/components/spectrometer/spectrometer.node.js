@@ -488,7 +488,7 @@ export class Spectrometer extends NodeDiv {
             );
             this.ctx.stroke();
 
-            this.querySelector('#capturedeets').innerHTML = `Snip Resolution: ${Math.round(Math.abs(this.props.picked.x1-this.props.picked.x0))}x${Math.round(Math.abs(this.props.picked.y1-this.props.picked.y0))}`
+            this.querySelector('#capturedeets').innerHTML = `Snip Resolution (actual): ${Math.round(Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0))}x${Math.round(Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0))}`
 
           
             //console.log(this.props.imgpicked)
