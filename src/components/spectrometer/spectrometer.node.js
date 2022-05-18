@@ -619,7 +619,6 @@ export class Spectrometer extends NodeDiv {
         }
     }
 
-    
     //pull the bitmap into canvas;
     canvasCapture(ev) {
 
