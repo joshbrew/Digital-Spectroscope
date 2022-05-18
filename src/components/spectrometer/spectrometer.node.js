@@ -1,5 +1,5 @@
-import { imgOverlayPicker, getBMP, convertBMPToPNG, recordCanvas, drawImage } from '../../utils/canvasMapping';
-import { createBitmapCanvasWithMenu } from './spawned';
+import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV, graphXintensities, reconstructImageData, recordCanvas, drawImage } from '../../utils/canvasMapping';
+import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
 
 
@@ -184,7 +184,6 @@ export class Spectrometer extends NodeDiv {
                 this.menu.style.display = 'none'
             }
         }
-
         
         //fileinput
         this.querySelector('#fileinput').onchange = this.handleFileInput;
@@ -194,7 +193,6 @@ export class Spectrometer extends NodeDiv {
                 this.canvasCapture(ev);
             }
         }
-
 
         const recordButton = () => {
             if(this.props.mode === 'video' && this.props.picked.y1 && this.props.picked.x1) {
@@ -537,7 +535,7 @@ export class Spectrometer extends NodeDiv {
 
     
     processCapture = (img) => {
-        createBitmapCanvasWithMenu(
+        this.createBitmapCanvasWithMenu(
             img,
             this.querySelector('#captured'),
             '49.99%',
@@ -545,7 +543,7 @@ export class Spectrometer extends NodeDiv {
         )
     }
 
-
+    
     //pull the bitmap into canvas;
     canvasCapture(ev) {
 
@@ -638,6 +636,133 @@ export class Spectrometer extends NodeDiv {
     } //on window resize
     //onchanged=(props)=>{} //on props changed
     //ondelete=(props)=>{} //on element deleted. Can remove with this.delete() which runs cleanup functions
+
+    async createBitmapCanvasWithMenu(img, parentNode, w='320px', h='180px') {
+        let template = `
+        <div style='width:${w}; height:${h};'>
+            <div>
+                <input id='title' type='text' placeholder='name'>
+                <button id='toggledisplay'>Toggle Display</button>
+                <button id='savepng'>Save PNG</button>
+                <button id='savebmp'>Save BMP</button>
+                <button id='savecsv'>Save CSV</button>
+                <button id='backup'>Backup</button>
+                <button id='X'>X</button>
+            </div>
+            <canvas id='capturecanvas' style='width:100%; height:100%;'></canvas>
+            <canvas id='graphcanvas' style='width:100%; height:100%;'></canvas>
+        </div>`;
+    
+        if(typeof parentNode === 'string') {
+            parentNode = document.getElementById(parentNode);
+        } 
+         
+        if(parentNode) {
+            parentNode.insertAdjacentHTML('afterbegin',template);
+            
+            let canvas = document.querySelector('#capturecanvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            let ctx = canvas.getContext('2d')
+            ctx.drawImage(img,0,0);
+    
+            let input = document.querySelector('#title');
+            console.log(img)
+            let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
+            let graph = document.querySelector('#graphcanvas');
+            let mapped = graphXintensities(graph.getContext('2d'), bmp);
+    
+            
+    
+            let capture= {
+                parentNode:parentNode,
+                width:img.width,
+                height:img.height,
+                canvas,
+                input,
+                mapped
+            }
+    
+            parentNode.querySelector('#toggledisplay').onclick = () => {
+                if(canvas.style.display == '' && graph.style.display == '') {
+                    canvas.style.display = 'none';
+                } else if (canvas.style.display == 'none') {
+                    canvas.style.display = '';
+                    graph.style.display = 'none';
+                } else if (graph.style.display == 'none') {
+                    graph.style.display = '';
+                }
+            }
+        
+            parentNode.querySelector('#backup').onclick = () => {
+                backupData(capture.mapped,input.value+'_'+new Date().toISOString());
+            } 
+    
+            parentNode.querySelector('#savepng').onclick = () => {
+    
+                //not super efficient but w/e
+                let tmp = new OffscreenCanvas(capture.mapped.bitmap.width,capture.mapped.bitmap.height);
+                tmp.getContext('2d').drawImage(img,0,0);
+    
+                let reader = new FileReader();
+    
+                reader.addEventListener("load", function () {
+                    // convert image file to base64 string
+    
+                    var hiddenElement = document.createElement('a');
+                    hiddenElement.href =  reader.result;
+                    hiddenElement.target = "_blank";
+                    if (input.value !== "") {
+                        hiddenElement.download = input.value+'_'+new Date().toISOString()+".png";
+                    } else{
+                        hiddenElement.download = new Date().toISOString()+".png";
+                    }
+                    hiddenElement.click();
+                }, false);
+                
+                tmp.convertToBlob({type:'image/png'}).then((blob) => {
+                    reader.readAsDataURL(blob);
+                })
+               
+    
+    
+            }
+                
+            parentNode.querySelector('#savebmp').onclick = () => {
+    
+                let dataurl = CanvasToBMP.ImageDatatoDataURL(
+                    reconstructImageData(
+                        capture.mapped.bitarr,
+                        capture.mapped.width,
+                        capture.mapped.height
+                    )
+                );
+                var hiddenElement = document.createElement('a');
+                hiddenElement.href = dataurl;
+                hiddenElement.target = "_blank";
+                if (input.value !== "") {
+                    hiddenElement.download = input.value+'_'+new Date().toISOString()+".bmp";
+                } else{
+                    hiddenElement.download = new Date().toISOString()+".bmp";
+                }
+                hiddenElement.click();
+            }
+    
+            parentNode.querySelector('#savecsv').onclick = () => {
+                dumpSpectrogramsToCSV(capture.mapped.xrgbintensities,input.value);
+            } 
+    
+            parentNode.querySelector('#X').onclick = () => {
+                canvas.parentNode.parentNode.removeChild(canvas.parentNode);
+            }
+    
+            return capture;
+        }
+    
+    
+        return template;
+    }
+
 }
 
 //window.customElements.define('custom-', Custom);
