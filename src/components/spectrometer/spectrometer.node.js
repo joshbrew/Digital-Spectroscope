@@ -154,6 +154,7 @@ export class Spectrometer extends NodeDiv {
             this.props.mode = 'img';
             this.videomenu.style.display = 'none';
             this.urlmenu.style.display = 'none';
+            this.querySelector('#sourcedeets').innerHTML = `Source Resolution: ${this.img.naturalWidth}x${this.img.naturalHeight}`;
             this.onresize();
         })
 
@@ -163,6 +164,8 @@ export class Spectrometer extends NodeDiv {
             this.props.mode = 'video';
             this.imgmenu.style.display = 'none';
             this.urlmenu.style.display = 'none';
+
+            this.querySelector('#sourcedeets').innerHTML = `Source Resolution: ${this.video.videoWidth}x${this.video.videoHeight}`;
             this.onresize();
         })
 
@@ -485,6 +488,8 @@ export class Spectrometer extends NodeDiv {
             );
             this.ctx.stroke();
 
+            this.querySelector('#capturedeets').innerHTML = `Snip Resolution: ${Math.round(Math.abs(this.props.picked.x1-this.props.picked.x0))}x${Math.round(Math.abs(this.props.picked.y1-this.props.picked.y0))}`
+
           
             //console.log(this.props.imgpicked)
 
@@ -666,8 +671,6 @@ export class Spectrometer extends NodeDiv {
             let graph = document.querySelector('#graphcanvas');
             let mapped = graphXintensities(graph.getContext('2d'), bmp);
     
-            
-    
             let capture= {
                 parentNode:parentNode,
                 width:img.width,
@@ -756,6 +759,12 @@ export class Spectrometer extends NodeDiv {
     
         return template;
     }
+
+    //pass results from mapBitmapXIntensities/graphXIntensities
+    async addBitmapComparison(mapped) {
+
+    }
+
 
 }
 
