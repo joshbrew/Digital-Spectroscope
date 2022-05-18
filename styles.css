@@ -43,6 +43,7 @@ spectrometer-node {
 
 #pickerDiv {
     grid-area: picker;
+    max-height:500px;
 }
 
 #pickerDiv img {
@@ -55,6 +56,7 @@ spectrometer-node {
     grid-area: capture;
     position: relative;
     border-left:1px solid gray;
+    max-height:500px;
 }
 
 #menu {
