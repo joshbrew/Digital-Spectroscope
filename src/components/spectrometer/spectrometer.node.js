@@ -152,10 +152,6 @@ export class Spectrometer extends NodeDiv {
 
         this.img.addEventListener('load', (ev)=>{
             this.props.mode = 'img';
-            this.props.picked.x0 = 0;
-            this.props.picked.y0 = 0;
-            this.props.picked.x1 = this.canvas.width;
-            this.props.picked.y1 = this.canvas.height;
             this.videomenu.style.display = 'none';
             this.urlmenu.style.display = 'none';
             this.onresize();
@@ -199,11 +195,11 @@ export class Spectrometer extends NodeDiv {
                 this.props.running = true;
 
                 let mediaRecorder = recordCanvas(this.capture);
-                this.querySelector('#record').innerHTML = "Recording...";
+                this.querySelector('#record').innerHTML = "⬜";
                 this.querySelector('#record').onclick = () => {
                     this.props.running = false;
                     mediaRecorder.stop();
-                    this.querySelector('#record').innerHTML = "Record";
+                    this.querySelector('#record').innerHTML = "🔴";
                     this.querySelector('#record').onclick = recordButton;
                 }
                 
@@ -251,8 +247,6 @@ export class Spectrometer extends NodeDiv {
         
         this.capturectx = this.capture.getContext('2d');
 
-        this.props.picked.x0 = 0;
-        this.props.picked.y0 = 0;
         this.canvas.onclick = this.canvasClicked;
 
         setTimeout(()=>{
@@ -641,16 +635,16 @@ export class Spectrometer extends NodeDiv {
         let template = `
         <div style='width:${w}; height:${h};'>
             <div>
-                <input id='title' type='text' placeholder='name'>
-                <button id='toggledisplay'>Toggle Display</button>
-                <button id='savepng'>Save PNG</button>
-                <button id='savebmp'>Save BMP</button>
-                <button id='savecsv'>Save CSV</button>
-                <button id='backup'>Backup</button>
-                <button id='X'>X</button>
+                <input id='title' type='text' placeholder='Name/Tag'>
+                <button id='savepng' title='Save PNG?'>🖼️(png)</button>
+                <button id='savecsv' title='Save CSV?'>📄(csv)</button>
+                <button id='savebmp' title='Save BMP?'>🖼️(bmp)</button>
+                <button id='backup' title='Backup (cache)?'>📋</button>
+                <button id='toggledisplay' title='Toggle display?'>👓</button>
+                <button  title='Close?' id='X'>❌</button>
             </div>
-            <canvas id='capturecanvas' style='width:100%; height:100%;'></canvas>
-            <canvas id='graphcanvas' style='width:100%; height:100%;'></canvas>
+            <canvas id='capturecanvas' style='width:100%;'></canvas>
+            <canvas id='graphcanvas' style='width:100%;'></canvas>
         </div>`;
     
         if(typeof parentNode === 'string') {

@@ -3,8 +3,25 @@ html, body {
     height: 100vh;
     margin: 0;
     overflow: hidden;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
 }
 
+button {
+    border: 1px solid white;
+    background-color: #202020;
+    color:white;
+    border-radius:3px;
+    padding: 5px;
+}
+
+button:hover {
+    background-color: darkslategray;
+}
+
+select {
+    background-color: #303030;
+    color:white;
+}
 
 spectrometer-node {
     width: 100%;
@@ -15,7 +32,7 @@ spectrometer-node {
    grid-template-areas: 
    "picker picker picker capture capture capture"
    "controls controls controls controls controls controls"
-   "compare compare captured captured saved saved";
+   "compare compare captured captured captured saved";
    background: rgb(25,25,25);
 }
 
@@ -37,6 +54,7 @@ spectrometer-node {
     /* background: blue; */
     grid-area: capture;
     position: relative;
+    border-left:1px solid gray;
 }
 
 #menu {
@@ -45,6 +63,8 @@ spectrometer-node {
     position: relative;
     transition: 0.5s;
     padding: 15px 25px;
+    border-top:1px solid gray;
+    border-bottom:1px solid gray;
 }
 
 #compare {
@@ -57,11 +77,32 @@ spectrometer-node {
     color: white;
     grid-area: captured;
     padding: 25px;
+    border-left:3px dotted gray;
 }
 
 #saved {
     color: white;
     grid-area: saved;
     padding: 25px;
+    border-left:2px double gray;
 }
 
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.0);
+    border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.25);
+    border-radius: 5px;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,1);
+  }
