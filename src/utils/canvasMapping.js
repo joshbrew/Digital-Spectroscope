@@ -346,7 +346,7 @@ export function unbufferCanvas(buffer=[], idx=0, renderlimit=10) {
 //capture a video clip for playback, we should save the video 
 //clip in these cases and reprocess instead of keeping giant bitmap 
 //collections except as needed
-export function recordCanvas(canvas, fps=30, withVideoURL=downloadMP4URL) {
+export function recordCanvas(canvas, fps=30, withVideoURL=downloadMP4URL, nSec=null) { //can specify number of seconds to record after calling start();
     let videoSrc = canvas.captureStream(fps);
     let mediaRecorder = new MediaRecorder(videoSrc); //https://medium.com/@amatewasu/how-to-record-a-canvas-element-d4d0826d3591
 
@@ -360,6 +360,14 @@ export function recordCanvas(canvas, fps=30, withVideoURL=downloadMP4URL) {
         chunks = [];
         let videoURL = URL.createObjectURL(blob);
         withVideoURL(videoURL);
+    }
+    
+    if(timeout) {
+        mediaRecorder.onstart = (e) => {        
+            setTimeout(()=>{
+                try{ mediaRecorder.stop(); } catch(err) {}
+            },nSec*1000);
+        }
     }
 
     return mediaRecorder;
