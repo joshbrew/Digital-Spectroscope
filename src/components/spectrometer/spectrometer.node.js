@@ -7,25 +7,27 @@ let component = require('./spectrometer.node.html');
 
 //TODO:
 /*
-    Make rectangle dynamically resizable (can use an invisible element overlay to be lazy).
+    - Image mixing and comparing, e.g. normalizing and cancelling out ambient intensities then doing variance between two corrected images to look at similarity. 
+        Visual confirmation can be quicker than data driven analysis in the field!
     
-    Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis. 
-    2 tags on the endpoints where you can set the wavelength manually, then you can drag them to squish/stretch the x-axis to set the wavelength values for each y. 
+    - Averaging e.g. a video capture or multiple captures with the same tag.
 
-    Hook up file input, merge video/image url inputs
+    - As a local db is built up, take anything with similar tags and provide dynamic stats e.g. storing up comparison results for quicker 
+        cross correlation, this should lead into a database tooling more easily
 
-    CSV of raw data & summary.
+    - Make rectangle dynamically resizable (can use an invisible element overlay to be lazy).
+    
+    - Make an interactive x-plot on the results chart to estimate three positions in the spectrogram to generate the x-axis. 
+        2 tags on the endpoints where you can set the wavelength manually, then you can drag them to squish/stretch the x-axis to set the wavelength values for each y. 
 
-    Save the image snip made with the chart.
+    - Build a log of the images in memory/indexeddb and a quick comparison feature. 
 
-    Build a log of the images in memory/indexeddb and a quick comparison feature. Visual confirmation can be quicker than data driven analysis in the field!
+    - Web hooks/sockets for passing data to/from the classifier model. Keep this super general so we can start to identify all kinds of materials!
 
-    Web hooks/sockets for passing data to/from the classifier model. Keep this super general so we can start to identify all kinds of materials!
-
-    Style, accounting for all of the above
+    - Style, accounting for all of the above
 
     Bugs:
-    Video snip proportions are still a little off
+    
     
 
 */
