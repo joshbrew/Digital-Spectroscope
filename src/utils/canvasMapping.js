@@ -362,7 +362,7 @@ export function recordCanvas(canvas, fps=30, withVideoURL=downloadMP4URL, nSec=n
         withVideoURL(videoURL);
     }
     
-    if(timeout) {
+    if(nSec) {
         mediaRecorder.onstart = (e) => {        
             setTimeout(()=>{
                 try{ mediaRecorder.stop(); } catch(err) {}
