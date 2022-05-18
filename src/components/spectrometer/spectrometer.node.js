@@ -212,7 +212,7 @@ export class Spectrometer extends NodeDiv {
                 this.props.running = true;
 
                 let mediaRecorder = recordCanvas(this.capture);
-                this.querySelector('#record').innerHTML = "⬜";
+                this.querySelector('#record').innerHTML = "🟥";
                 this.querySelector('#record').onclick = () => {
                     this.props.running = false;
                     mediaRecorder.stop();
