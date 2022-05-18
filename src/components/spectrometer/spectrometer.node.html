@@ -37,19 +37,19 @@ frame buffering stuff cuz graphs
 
         <div id="menu" title="Source controls">
             <button id="snip" title="Capture and Analyze Spectrogram?">Analyze 💻</button>
-            <div id="videomenu" style="display:none;">
+            <span id="videomenu" style="display:none;">
                 <button id="record">🔴</button>
-            </div>
+            </span>
             <button id="webcam">Use Webcam 🎥</button>
             <button id="fileinput">Upload File 📥</button>
             <button id="useurl">Use URL 🌐</button>
             <button id="image">Use Image 🖼️</button>
             <button style="float:right;" id="help" title="Help!">❓</button>
-            <div id="imgmenu">
+            <span id="imgmenu">
                 <span style="color:white;">Preloaded Images:</span>
                 <select id="imgselect"></select>
-            </div>
-            <div id="urlmenu" style="display:none;">
+            </span>
+            <span id="urlmenu" style="display:none;">
                 <input type="url" id="urlinput" placeholder="Image or Video File URL"></input>
                 <span style="color:white;">File type:</span>
                 <select id="urlselect">
@@ -57,7 +57,7 @@ frame buffering stuff cuz graphs
                     <option value="video">Video</option>
                 </select>
                 <button id="seturl">Set URL</button>
-            </div>
+            </span>
             <br>
             <div id="instructions" style="color:white; display:none;">
                 Instructions: Click to draw a rectangle around the portion of the image or video you want to snip, 

@@ -152,6 +152,7 @@ export class Spectrometer extends NodeDiv {
 
         this.img.addEventListener('load', (ev)=>{
             this.props.mode = 'img';
+            this.imgmenu.style.display = '';
             this.videomenu.style.display = 'none';
             this.urlmenu.style.display = 'none';
             this.querySelector('#sourcedeets').innerHTML = `Source Resolution: ${this.img.naturalWidth}x${this.img.naturalHeight}`;
@@ -160,9 +161,10 @@ export class Spectrometer extends NodeDiv {
 
         this.video = this.querySelector('video');
 
-        this.video.addEventListener('load', (ev)=>{
+        this.video.addEventListener('canplay', (ev)=>{
             this.props.mode = 'video';
             this.imgmenu.style.display = 'none';
+            this.videomenu.style.display = '';
             this.urlmenu.style.display = 'none';
 
             this.querySelector('#sourcedeets').innerHTML = `Source Resolution: ${this.video.videoWidth}x${this.video.videoHeight}`;
@@ -492,14 +494,13 @@ export class Spectrometer extends NodeDiv {
 
           
             //console.log(this.props.imgpicked)
-
+            // Scale Capture
+            this.capture.width = this.captureDiv.clientWidth; //Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
+            this.capture.height = this.captureDiv.clientHeight;  //Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
             if(this.props.mode === 'video') {
                 this.continuousCapture(this.video); 
             }
             else {
-                       // Scale Capture
-                this.capture.width = this.captureDiv.clientWidth ; //Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
-                this.capture.height = this.captureDiv.clientHeight;  //Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
                 drawImage(
                     this.capturectx,
                     this.img,
@@ -526,7 +527,7 @@ export class Spectrometer extends NodeDiv {
                 this.props.imgpicked.y0,
                 Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0),
                 Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0),
-                0,0,this.capturectx.width,this.capturectx.height //dest
+                0,0,this.capture.width,this.capture.height //dest
             );
             setTimeout(()=>{requestAnimationFrame(()=>{this.continuousCapture(img);})},33.3333);
         }
