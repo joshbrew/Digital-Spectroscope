@@ -28,7 +28,7 @@ spectrometer-node {
     height: 100%;
    display: grid;
    grid-template-columns: repeat(6,1fr);
-   grid-template-rows: 1fr min-content 1fr;
+   grid-template-rows: 30% min-content 1fr;
    grid-template-areas: 
    "picker picker picker capture capture capture"
    "controls controls controls controls controls controls"
@@ -43,7 +43,6 @@ spectrometer-node {
 
 #pickerDiv {
     grid-area: picker;
-    max-height:500px;
 }
 
 #pickerDiv img {
@@ -56,7 +55,6 @@ spectrometer-node {
     grid-area: capture;
     position: relative;
     border-left:1px solid gray;
-    max-height:500px;
 }
 
 #menu {
