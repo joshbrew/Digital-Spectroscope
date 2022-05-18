@@ -220,6 +220,7 @@ export class Spectrometer extends NodeDiv {
                     this.querySelector('#record').onclick = recordButton;
                 }
                 
+                mediaRecorder.start();
                 // let anim = () => {
                 //     if(!this.props.running || !(this.props.picked.y1 && this.props.picked.x1)) return;
                 //     this.canvasCapture();
