@@ -3,8 +3,8 @@
 
 <!--
 
-<Menu>
 <ImageOrVid><Result watched image>
+<Menu>
 <Result Spectrogram> <Compared Spectrogram> (can overlay)
 <Res2>               <Comp2>
     ...                 ...
@@ -22,35 +22,44 @@ frame buffering stuff cuz graphs
 
 -->
 
-        <div id="pickerDiv" style="position: relative;"> <!-- We want the source canvas to maintain the source image/video's aspect ratio so it looks correct, the capture can be stretched otherwise-->
-            <img src="" style="position: absolute; top: 0; z-index:1;" ></img>
-            <video src="" style="position: absolute; top: 0; display:none; z-index:2;" ></video>
-            <canvas id="picker" style="position: absolute; top: 0; z-index:3;" ></canvas>
+        <div id="pickerDiv" style="position: relative; display:flex; align-items:center;"> <!-- We want the source canvas to maintain the source image/video's aspect ratio so it looks correct, the capture can be stretched otherwise-->
+            <img src="" style="position: absolute; z-index:1;" ></img>
+            <video src="" style="position: absolute; display:none; z-index:2;" ></video>
+            <canvas id="picker" style="position: absolute; z-index:3;" ></canvas>
         </div>
         <div id="captureDiv"><canvas id="capture" style="z-index:11; height:100%; width:100%;" height="100%" width="100%"></canvas></div>
         
-        <button id="toggleMenu">Toggle Menu</button>
+        <button id="toggleMenu" style="display:none;">Toggle Menu</button>
 
-        <div id="menu" style="">
+        <div id="menu">
             <button id="snip">Analyze</button>
-            <button id="animate">Record</button>
+            <div id="videomenu" style="display:none;">
+                <button id="record">Record</button>
+            </div>
             <button id="webcam">Use Webcam</button>
             <button id="image">Use Image</button>
-            <span style="color:white;">Image:</span><select id="imgselect">
-                <option value="src/assets/spectrum_full.png" selected>Full Image</option>
-                <option value="src/assets/spectrum1.png">Spectrum 1</option>
-                <option value="src/assets/spectrum2.jpg">Spectrum 2</option>
-                <option value="src/assets/shrimp.jpg">Shrimp</option>
-                <option value="src/assets/chickenfat.png">Chicken Fat</option>
-                <option value="src/assets/chickenbreast.png">Chicken Breast</option>
-                <option value="src/assets/brownbeerbottle.png">Brown Beer Bottle</option>
-            </select>
-            <input type="url" id="imgurl" placeholder="Image URL"></input>
-            <button id="setImgUrl">Set Image URL</button>
-            <input type="url" id="videourl" placeholder="Video URL"></input>
-            <button id="setVideoUrl">Set Video URL</button>
-            <button id="fileinput">Load File</button>
-            <span style="color:white;">Click to draw a rectangle around the portion of the image you want to analyze!</span>
+            <button id="fileinput">Upload File</button>
+            <button id="useurl">Use URL</button>
+            <div id="imgmenu">
+                <span style="color:white;">Preloaded Images:</span>
+                <select id="imgselect"></select>
+            </div>
+            <div id="urlmenu" style="display:none;">
+                <input type="url" id="urlinput" placeholder="Image or Video File URL"></input>
+                <span style="color:white;">File type:</span>
+                <select id="urlselect">
+                    <option value="img" selected>Image</option>
+                    <option value="video">Video</option>
+                </select>
+                <button id="seturl">Set URL</button>
+            </div>
+            <br>
+            <button style="float:right;" id="help">Help</button>
+            <div id="instructions" style="color:white; display:none;">
+                Instructions: Click to draw a rectangle around the portion of the image or video you want to snip, 
+                then click Analyze to create a downloadable spectrogram you can compare with other results!
+            </div>
+            <br>
         <hr>
             </div>
         <div  id="compare" style="overflow-y:scroll;">

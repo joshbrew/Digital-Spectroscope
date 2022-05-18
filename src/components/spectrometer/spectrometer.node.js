@@ -46,6 +46,15 @@ export class Spectrometer extends NodeDiv {
     imgselect; //select options
     captures = {};
     loaded = {}; //loaded images and videos
+    imgfiles = {
+        'Test Image':'src/assets/spectrum_full.png',
+        'Spectrum 1': 'src/assets/spectrum1.png',
+        'Spectrum 2': 'src/assets/spectrum2.jpg',
+        'Shrimp': 'src/assets/shrimp.jpg',
+        'Chicken Fat': 'src/assets/chickenfat.png',
+        'Chicken Breast': 'src/assets/chickenbreast.png',
+        'Brown Beer Bottle': 'src/assets/brownbeerbottle.png'
+    }
 
     //set the template string or function (which can input props to return a modified string)
     template=component;
@@ -109,19 +118,56 @@ export class Spectrometer extends NodeDiv {
         this.canvas = this.querySelector('#picker');
         this.pickerDiv = this.querySelector('#pickerDiv');
         this.captureDiv = this.querySelector('#captureDiv');
+        this.imgmenu = this.querySelector('#imgmenu');
+        this.videomenu = this.querySelector('#videomenu');
+        this.urlmenu = this.querySelector('#urlmenu');
+        this.imgselect = this.querySelector('#imgselect');
+
+        for(const key in this.imgfiles) {
+            let template = `<option value="${this.imgfiles[key]}">${key}</option>`
+            this.imgselect.insertAdjacentHTML('beforeend',template);
+        }
+
+        this.imgselect.options[0].selected = true;
+
+        this.imgselect.oninput = this.useImage;
+
+        this.querySelector('#useurl').onclick = () => {
+            if(this.urlmenu.style.display == 'none')
+                this.urlmenu.style.display = '';
+            else 
+                this.urlmenu.style.display = 'none';
+        }
+
+        this.querySelector('#help').onclick = () => {
+            let instructionDiv = this.querySelector('#instructions');
+
+            if(instructionDiv.style.display == 'none')
+                instructionDiv.style.display = '';
+            else 
+                instructionDiv.style.display = 'none';
+        }
 
         this.img = this.querySelector('img');
 
         this.img.addEventListener('load', (ev)=>{
-            this.props.mode = 'img'
-            this.onresize()
+            this.props.mode = 'img';
+            this.props.picked.x0 = 0;
+            this.props.picked.y0 = 0;
+            this.props.picked.x1 = this.canvas.width;
+            this.props.picked.y1 = this.canvas.height;
+            this.videomenu.style.display = 'none';
+            this.urlmenu.style.display = 'none';
+            this.onresize();
         })
 
         this.video = this.querySelector('video');
 
         this.video.addEventListener('load', (ev)=>{
-            this.props.mode = 'vid'
-            this.onresize()
+            this.props.mode = 'video';
+            this.imgmenu.style.display = 'none';
+            this.urlmenu.style.display = 'none';
+            this.onresize();
         })
 
         this.select = this.querySelector('#imgselect');
@@ -129,7 +175,7 @@ export class Spectrometer extends NodeDiv {
 
         this.menu = this.querySelector('#menu');
         this.toggleMenu = this.querySelector('#toggleMenu');
-        this.toggleMenu.style = `position: absolute; top: 25px; right: 25px;`
+        //this.toggleMenu.style = `position: absolute; bottom: 25px; right: 25px;`
         this.toggleMenu.onclick = () => {
             if (this.menu.style.display === 'none') {
                 this.menu.style.display = ''
@@ -155,12 +201,12 @@ export class Spectrometer extends NodeDiv {
                 this.props.running = true;
 
                 let mediaRecorder = recordCanvas(this.capture);
-                this.querySelector('#animate').innerHTML = "Recording...";
-                this.querySelector('#animate').onclick = () => {
+                this.querySelector('#record').innerHTML = "Recording...";
+                this.querySelector('#record').onclick = () => {
                     this.props.running = false;
                     mediaRecorder.stop();
-                    this.querySelector('#animate').innerHTML = "Record";
-                    this.querySelector('#animate').onclick = recordButton;
+                    this.querySelector('#record').innerHTML = "Record";
+                    this.querySelector('#record').onclick = recordButton;
                 }
                 
                 // let anim = () => {
@@ -174,7 +220,7 @@ export class Spectrometer extends NodeDiv {
             }
         }
 
-        this.querySelector('#animate').onclick = recordButton;
+        this.querySelector('#record').onclick = recordButton;
 
         this.select.onchange = (ev) => {
             // if(this.props.mode === 'img') this.useImage();
@@ -182,44 +228,15 @@ export class Spectrometer extends NodeDiv {
         
         this.querySelector('#webcam').onclick = this.useWebcam;
         this.querySelector('#image').onclick = this.useImage;
-        this.querySelector('#setImgUrl').onclick = this.inputImgUrl;
-        this.querySelector('#setVideoUrl').onclick = this.inputVideoSrc;
+        this.querySelector('#seturl').onclick = () => {
+            if(this.querySelector('#urlselect').value == img) {
+                this.inputImgUrl();
+            } else {
+                this.inputVideoSrc();
+            }
+        };
         this.querySelector('#fileinput').onclick = this.loadFile;
 
-        // if(props.width) {
-        //     this.canvas.width = props.width;
-        //     this.canvas.style.width = props.width;
-        //     this.video.width = props.width;
-        //     this.video.style.width = props.width;
-        //     this.img.width = props.width;
-        //     this.img.style.width = props.width;
-        // }
-        // if(props.height) {
-        //     this.canvas.height = props.height;
-        //     this.canvas.style.height = props.height;
-        //     this.video.height = props.height;
-        //     this.video.style.height = props.height;
-        //     this.img.height = props.height;
-        //     this.img.style.height = props.height;
-        // }
-        // if(props.style) {
-        //     this.canvas.style = props.style;
-        //     this.canvas.zIndex = 3;
-        //     this.video.style = props.style;
-        //     this.video.zIndex = 2;
-        //     this.img.style = props.style;
-        //     this.img.zIndex = 1;
-        //     setTimeout(()=>{
-        //         this.canvas.height = this.canvas.clientHeight;
-        //         this.canvas.width = this.canvas.clientWidth;
-        //         this.img.width = props.width;
-        //         this.img.height = props.height;
-        //         this.video.width = props.width;
-        //         this.video.height = props.height;
-        //     },10); //slight recalculation delay time
-        // }
-
-        
         // this.offscreen.height = this.canvas.height;
         // this.offscreen.width = this.canvas.width;
 
@@ -254,8 +271,6 @@ export class Spectrometer extends NodeDiv {
         this.img.width = 0
         setTimeout(() => {
             this.onresize() // RESIZE WHEN INITIALIZED
-            this.props.picked.x1 = this.canvas.width;
-            this.props.picked.y1 = this.canvas.height;
             
         }, 50)
 
@@ -310,7 +325,7 @@ export class Spectrometer extends NodeDiv {
 
     inputImgUrl() {
         this.props.running = false;
-        let input = this.querySelector('#imgurl').value;
+        let input = this.querySelector('#urlinput').value;
         if(input) {
             if(this.video.src) {
                 this.video.pause();;
@@ -331,7 +346,7 @@ export class Spectrometer extends NodeDiv {
         this.img.style.display = 'none';
         this.video.style.display = '';
         
-        let input = this.querySelector('#videourl').value;
+        let input = this.querySelector('#urlinput').value;
 
         if(input) {
             this.video.src = input;
@@ -341,7 +356,7 @@ export class Spectrometer extends NodeDiv {
         }
     }
 
-    loadFile() {
+    loadFile = () => {
         var input = document.createElement('input');
         input.accept = '.mp4,.png,.bmp,.jpg';
         input.type = 'file';
@@ -479,7 +494,7 @@ export class Spectrometer extends NodeDiv {
             this.ctx.stroke();
 
           
-            console.log(this.props.imgpicked)
+            //console.log(this.props.imgpicked)
 
             if(this.props.mode === 'video') {
                 this.continuousCapture(this.video); 
@@ -516,7 +531,7 @@ export class Spectrometer extends NodeDiv {
                 Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0),
                 0,0,this.capturectx.width,this.capturectx.height //dest
             );
-            this.continuousCapture(img);
+            setTimeout(()=>{requestAnimationFrame(()=>{this.continuousCapture(img);})},33.3333);
         }
     }
 
@@ -583,27 +598,33 @@ export class Spectrometer extends NodeDiv {
 
     //after rendering
     onresize=(props)=>{
-
         // Set image size
-        const imageRatio = this.img.naturalHeight/this.img.naturalWidth;
-        const desiredWidth = this.pickerDiv.clientWidth
+        let imageRatio;
+        const desiredWidth = this.pickerDiv.clientWidth;
 
         // Relative to Height
-        this.correctForRatio(this.img, desiredWidth, this.pickerDiv.clientHeight, imageRatio)
-
+        if(this.props.mode === 'img') {
+            imageRatio = this.img.naturalHeight/this.img.naturalWidth;
+            this.correctForRatio(this.img, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
+        }
+        else if(this.props.mode === 'video') {
+            imageRatio = this.video.videoHeight/this.video.videoWidth;
+            this.correctForRatio(this.video, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
+        }
+        
         if(this.canvas) {
             
             // Match Image
             if(this.props.mode === 'img' && this.img?.naturalWidth > 0) {
-                console.log('IMG correct')
-                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio)
+                //console.log('IMG correct')
+                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
             } 
             
             // Match Video
             else if (this.props.mode === 'video' && this.video && this.video?.videoWidth > 0) {
-                this.canvas.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
+                this.correctForRatio(this.canvas, desiredWidth, this.pickerDiv.clientHeight, imageRatio);
                 // this.canvas.style.height = this.video.parentNode.clientWidth * this.video.videoHeight/this.video.videoWidth;
-                console.log('vid', this.canvas.height)
+                //console.log('vid', this.canvas.height)
             } 
 
             // Fill Parent
