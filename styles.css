@@ -28,7 +28,7 @@ spectrometer-node {
     height: 100%;
    display: grid;
    grid-template-columns: repeat(6,1fr);
-   grid-template-rows: 30% min-content 1fr;
+   grid-template-rows: 40% min-content 1fr;
    grid-template-areas: 
    "picker picker picker capture capture capture"
    "controls controls controls controls controls controls"
