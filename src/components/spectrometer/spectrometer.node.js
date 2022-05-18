@@ -612,9 +612,8 @@ export class Spectrometer extends NodeDiv {
     processCapture = (img) => {
         let capture = this.createBitmapCanvasWithMenu(
             img,
-            this.querySelector('#captured'),
-            '49.99%',
-            '200px'
+            this.querySelector('#capturelist'),
+            '100%'
         )
         if(capture.timestamp) {
             this.captures[capture.timestamp] = capture;
@@ -673,19 +672,20 @@ export class Spectrometer extends NodeDiv {
 
     async createBitmapCanvasWithMenu(img, parentNode, w='320px', h='180px') {
         let template = `
-        <div style='width:${w}; height:${h};'>
-            <div>
-                <input id='title' type='text' placeholder='Name/Tag'>
-                <button id='savepng' title='Save PNG?'>🖼️(png)</button>
-                <button id='savecsv' title='Save CSV?'>📄(csv)</button>
-                <button id='savebmp' title='Save BMP?'>🖼️(bmp)</button>
-                <button id='backup' title='Backup (cache)?'>📋</button>
-                <button id='toggledisplay' title='Toggle display?'>👓</button>
-                <button  title='Close?' id='X'>❌</button>
-            </div>
-            <canvas id='capturecanvas' style='width:100%;'></canvas>
-            <canvas id='graphcanvas' style='width:100%;'></canvas>
-        </div>`;
+        <div style='width:${w}; max-height:${h}; border: 1px solid white; border-radius:3px; padding:2px;'>
+            <span style='height:6%;'>
+                <input id='title' type='text' placeholder='Name/Tag' style='padding:4px; font-size:8px; width:15%;'>
+                <button id='savepng' title='Save PNG?' style='font-size:8px;'>🖼️(png)</button>
+                <button id='savecsv' title='Save CSV?' style='font-size:8px;'>📄(csv)</button>
+                <button id='savebmp' title='Save BMP?' style='font-size:8px;'>🖼️(bmp)</button>
+                <button id='backup' title='Backup (cache)?' style='font-size:8px;'>📋
+                </button><button  title='Close?' id='X' style='font-size:8px; float:right;'>❌</button>
+                <button id='toggledisplay' title='Toggle display?' style='font-size:8px; float:right;'>👓</button>
+                
+            </span><br>
+            <canvas id='capturecanvas' style='width:100%; max-height:30%;'></canvas>
+            <canvas id='graphcanvas' style='width:100%; height:54%; background-color:black;'></canvas>
+        </div><br>`;
     
         if(typeof parentNode === 'string') {
             parentNode = document.getElementById(parentNode);
@@ -704,6 +704,8 @@ export class Spectrometer extends NodeDiv {
             //console.log(img);
             let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
             let graph = document.querySelector('#graphcanvas');
+            graph.width = canvas.width;
+            graph.height = canvas.height;
             let mapped = graphXintensities(graph.getContext('2d'), bmp);
     
             let capture = {
