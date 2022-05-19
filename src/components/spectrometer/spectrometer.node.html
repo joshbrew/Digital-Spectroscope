@@ -69,17 +69,50 @@ frame buffering stuff cuz graphs
         <hr>
             </div>
         <div  id="compare" style="overflow-y:scroll;" title="Compare spectrogram results directly.">
-            <span style="position:relative; top:0px; right:0px;">Mix & Compare</span>
+            <span>Mix & Compare</span>
             <div id="comparelist">
+                <table style="height:100%; width:100%; font-size:10px;">
+                    <tr>
+                        <td>Sample 1<br>
+                            <canvas id="sample1" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                        <td>Sample 2<br>
+                            <canvas id="sample2" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Difference: Sample 2 - Sample 1<br>
+                            <canvas id="s2-s1" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Baseline<br>
+                            <canvas id="baseline" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>A1: Baseline - Sample 1 (absorbance)<br>
+                            <canvas id="b-s1" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                        <td>A2: Baseline - Sample 2 (absorbance)<br>
+                            <canvas id="b-s2" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Difference: A2 - A1<br>
+                            <canvas id="d2-d1" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
         <div id="captured" style="overflow-y:scroll;" title="All captures made this session.">
-            <span style="position:relative; top:0px; right:0px;">Captures</span>
+            <span>Captures</span>
             <div id="capturelist">
             </div>
         </div>
         <div id="saved" style="overflow-y:scroll; overflow-x:hidden;" title="Captures that can be restored from cache.">
-            <span style="position:relative; top:0px; right:0px;">Saved</span>
+            <span>Saved</span>
             <div id="savedlist">
             </div>
         </div>

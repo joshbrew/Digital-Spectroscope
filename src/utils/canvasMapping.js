@@ -50,7 +50,22 @@ export function getCanvasBitmap(context,x0=0,y0=0,w=context.canvas.width,h=conte
     return context.getImageData(x0,y0,w,h);
 }
 
+export function getMaxima(xrgbintensities=[{r,g,b,i}]) {
+    let xintmax  = Math.max(...xrgbintensities.map((x) => {return x.i}));
+    let xrintmax = Math.max(...xrgbintensities.map((x) => {return x.r}));
+    let xbintmax = Math.max(...xrgbintensities.map((x) => {return x.b}));
+    let xgintmax = Math.max(...xrgbintensities.map((x) => {return x.g}));
 
+    let xrgbmax  = Math.max(xrintmax,xbintmax,xgintmax);
+
+    return {
+        xintmax,
+        xrintmax,
+        xbintmax,
+        xgintmax,
+        xrgbmax
+    }
+}
 
 //pass context.getImageData() result
 export function mapBitmapXIntensities(bitmapImageData) {
@@ -144,6 +159,112 @@ export function compareBitmaps(bitmap1,bitmap2) {
 
 }
 
+export function graphXIntensities(context, xrgbintensities, xintmax, xintmin, x0=0, y0=0, width=context.canvas.width, height=context.canvas.height) {
+
+    //console.log(xintmax);
+    context.fillStyle = 'black';
+    context.lineWidth = 1;
+
+    //draw the x axis
+
+    if(!xintmax) {
+        xintmax = Math.max(...xrgbintensities.map(y => y.i));
+    }
+    if(!xintmin) {
+        xintmin = Math.min(...xrgbintensities.map(y => y.i));
+    }
+    if(xintmin > 0) xintmin = 0;
+
+    context.strokeStyle = 'gray';
+    context.beginPath();
+    let zeroHeight = height*(1-(0-xintmin)/(xintmax-xintmin));
+    context.moveTo(0,zeroHeight);
+    context.lineTo(width,zeroHeight);
+    context.stroke();
+    
+    let mapped = {
+        xrgbintensities,
+        xintmax,
+        xintmin
+    }
+
+    let npixels = mapped.xrgbintensities.length;
+    let xscalar = width/npixels;
+
+
+    context.strokeStyle = 'ghostwhite';
+    context.beginPath();
+
+    mapped.xrgbintensities.forEach((yrgbi,i) => {
+        if(i === 0) {
+            context.moveTo(x0,y0+height*(1-(yrgbi.i - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+        else {
+            context.lineTo(x0+i*xscalar,y0+height*(1-(yrgbi.i - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+    });
+
+
+    context.stroke();
+    
+    context.strokeStyle = 'tomato';
+    context.lineWidth = 1;
+
+    context.beginPath();
+
+    mapped.xrgbintensities.forEach((yrgbi,i) => {
+        if(i === 0) {
+            context.moveTo(x0,y0+height*(1-(yrgbi.r - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+        else {
+            context.lineTo(x0+i*xscalar,y0+height*(1-(yrgbi.r - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+    });
+
+    context.stroke();
+    
+    context.strokeStyle = '#00b8f5';
+
+    context.beginPath();
+
+    
+    mapped.xrgbintensities.forEach((yrgbi,i) => {
+        if(i === 0) {
+            context.moveTo(x0,y0+height*(1-(yrgbi.b - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+        else {
+            context.lineTo(x0+i*xscalar,y0+height*(1-(yrgbi.b - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+    });
+    
+    context.stroke();
+    
+    context.strokeStyle = 'chartreuse';
+
+    context.beginPath();
+    
+
+    mapped.xrgbintensities.forEach((yrgbi,i) => {
+        if(i === 0) {
+            context.moveTo(x0,y0+height*(1-(yrgbi.g - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+        else {
+            context.lineTo(x0+i*xscalar,y0+height*(1-(yrgbi.g - xintmin)/(mapped.xintmax-mapped.xintmin)));
+        }
+    });
+
+    context.stroke();
+    //update the plot from the bitmap
+    
+   // console.log(this.bitmap, xintensities, xrgbintensities);
+    return mapped;
+}
+
+//we have a list of canvases to populate as new captures stream in
+//we also have a list on the right side of saved canvases we are comparing
+//lets bump off canvases past a certain limit, offscreencanvas?
+
+
 //return an array estimating the wavelengths of light along the x axis
 export function targetSpectrogram(xrgbintensities, xrintmax, xgintmax, xbintmax, peakR=650, peakG=520, peakB=450) {
     let ri, gi, bi;
@@ -209,89 +330,6 @@ export function drawImage(
 ) {
     return context.drawImage(img,sx0,sy0,sw,sh,dx0,dy0,dw,dh);
 }
-
-export function graphXintensities(context, bitmapImageData, x0=0, y0=0, width=context.canvas.width, height=context.canvas.height) {
-
-    let results = mapBitmapXIntensities(bitmapImageData);
-    //console.log(xintmax);
-    context.fillStyle = 'white';
-
-    context.strokeStyle = 'ghostwhite';
-    context.lineWidth = 1;
-
-    context.beginPath();
-
-    let npixels = results.xrgbintensities.length;
-    let xscalar = width/npixels;
-    results.xrgbintensities.forEach((yrgbi,i) => {
-        if(i === 0) {
-            context.moveTo(x0,y0+height*(1-yrgbi.i/results.xintmax));
-        }
-        else {
-            context.lineTo(x0+i*xscalar,y0+height*(1-yrgbi.i/results.xintmax));
-        }
-    });
-
-
-    context.stroke();
-    
-    context.strokeStyle = 'tomato';
-    context.lineWidth = 1;
-
-    context.beginPath();
-
-    results.xrgbintensities.forEach((yrgbi,i) => {
-        if(i === 0) {
-            context.moveTo(x0,y0+height*(1-yrgbi.r/results.xintmax));
-        }
-        else {
-            context.lineTo(x0+i*xscalar,y0+height*(1-yrgbi.r/results.xintmax));
-        }
-    });
-
-    context.stroke();
-    
-    context.strokeStyle = '#00b8f5';
-
-    context.beginPath();
-
-    
-    results.xrgbintensities.forEach((yrgbi,i) => {
-        if(i === 0) {
-            context.moveTo(x0,y0+height*(1-yrgbi.b/results.xintmax));
-        }
-        else {
-            context.lineTo(x0+i*xscalar,y0+height*(1-yrgbi.b/results.xintmax));
-        }
-    });
-    
-    context.stroke();
-    
-    context.strokeStyle = 'chartreuse';
-
-    context.beginPath();
-    
-
-    results.xrgbintensities.forEach((yrgbi,i) => {
-        if(i === 0) {
-            context.moveTo(x0,y0+height*(1-yrgbi.g/results.xintmax));
-        }
-        else {
-            context.lineTo(x0+i*xscalar,y0+height*(1-yrgbi.g/results.xintmax));
-        }
-    });
-
-    context.stroke();
-    //update the plot from the bitmap
-    
-   // console.log(this.bitmap, xintensities, xrgbintensities);
-    return results;
-}
-
-//we have a list of canvases to populate as new captures stream in
-//we also have a list on the right side of saved canvases we are comparing
-//lets bump off canvases past a certain limit, offscreencanvas?
-
 
 //scrollwheel of canvases, anything past the renderlimit gets turned into an offscreen canvas
 export function bufferCanvas(canvas, buffer=[], idx=0, renderlimit=10, offscreenlimit=40) {
@@ -534,7 +572,7 @@ export function dumpSpectrogramsToCSV(xrgbintensities, title) {
     );
 }
 
-export function dumpBMPToCSV(arr,title,w,h) { //dump the raw srgb array from our graphxintensities result to CSV or the intensity map(s)
+export function dumpBMPToCSV(arr,title,w,h) { //dump the raw srgb array from our graphIntensityMap result to CSV or the intensity map(s)
     
     let csvraw = ``;
     let j = 0;

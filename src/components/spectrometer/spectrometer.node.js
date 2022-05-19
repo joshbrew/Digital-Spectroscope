@@ -1,4 +1,4 @@
-import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV, graphXintensities, reconstructImageData, recordCanvas, drawImage } from '../../utils/canvasMapping';
+import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV,graphXIntensities, reconstructImageData, recordCanvas, drawImage, mapBitmapXIntensities } from '../../utils/canvasMapping';
 import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
 
@@ -60,7 +60,15 @@ export class Spectrometer extends NodeDiv {
         'Chicken Breast': 'src/assets/chickenbreast.png',
         'Brown Beer Bottle': 'src/assets/brownbeerbottle.png'
     }
-    comparing = {} //images being compared and their current settings
+    comparing = {
+        sample1:undefined,
+        sample2:undefined,
+        baseline:undefined,
+        s2_s1:undefined,
+        a1:undefined,
+        a2:undefined,
+        a2_a1:undefined
+    } //images being compared and their current settings
 
     //set the template string or function (which can input props to return a modified string)
     template=component;
@@ -610,9 +618,11 @@ export class Spectrometer extends NodeDiv {
             );
             if(this.graphVideoSnip) {
                 let imgdata = this.capturectx.getImageData(0,0,this.capture.width,this.capture.height);
-                let mapped = graphXintensities(
+                let mapped = mapBitmapXIntensities(imgdata);
+                graphXIntensities(
                     this.capturectx,
-                    imgdata
+                    mapped.xrgbintensities,
+                    mapped.xintmax
                 );
             }
             setTimeout(()=>{requestAnimationFrame(async ()=>{this.continuousCapture(img);})},33.3333);
@@ -692,7 +702,9 @@ export class Spectrometer extends NodeDiv {
                 <button id='backup' title='Backup (cache)?' style='font-size:8px;'>📋
                 </button><button  title='Close?' id='X' style='font-size:8px; float:right;'>❌</button>
                 <button id='toggledisplay' title='Toggle display?' style='font-size:8px; float:right;'>👓</button>
-                
+                <button id='setsample2' title='Compare as Sample 2' style='font-size:8px; float:right;'>S2</button>
+                <button id='setsample1' title='Compare as Sample 1' style='font-size:8px; float:right;'>S1</button>
+                <button id='setbaseline' title='Compare as Baseline' style='font-size:8px; float:right;'>B</button>
             </span><br>
             <canvas id='capturecanvas' style='width:100%; max-height:30%;'></canvas>
             <canvas id='graphcanvas' style='width:100%; height:54%; background-color:black;'></canvas>
@@ -717,7 +729,8 @@ export class Spectrometer extends NodeDiv {
             let graph = document.querySelector('#graphcanvas');
             graph.width = canvas.width;
             graph.height = canvas.height;
-            let mapped = graphXintensities(graph.getContext('2d'), bmp);
+            let mapped = mapBitmapXIntensities(bmp);
+            graphXIntensities(graph.getContext('2d'),mapped.xrgbintensities,mapped.xintmax);
     
             let capture = {
                 node:canvas.parentNode,
@@ -725,10 +738,33 @@ export class Spectrometer extends NodeDiv {
                 width:img.width,
                 height:img.height,
                 canvas,
+                graph,
                 input,
                 timestamp:Date.now(),
                 mapped
             };
+
+            parentNode.querySelector('#setsample1').onclick = () => {
+                this.addBitmapComparison(
+                    mapped,
+                    input.value,
+                    1
+                );
+            }
+            parentNode.querySelector('#setsample2').onclick = () => {
+                this.addBitmapComparison(
+                    mapped,
+                    input.value,
+                    2
+                );
+            }
+            parentNode.querySelector('#setbaseline').onclick = () => {
+                this.addBitmapComparison(
+                    mapped,
+                    input.value,
+                    3
+                );
+            }
     
             parentNode.querySelector('#toggledisplay').onclick = () => {
                 if(canvas.style.display == '' && graph.style.display == '') {
@@ -811,8 +847,118 @@ export class Spectrometer extends NodeDiv {
     }
 
     //pass results from mapBitmapXIntensities/graphXIntensities
-    async addBitmapComparison(mapped) {
+    async addBitmapComparison(
+        mapped, //result from createBitmapCanvasMenu provided a parentNode
+        title=new Date().toISOString(), //for downloading the csv
+        sample=1 //sample 1, 2, 3 (baseline) ?
+    ) {
+        if(sample !== 1 && sample !== 2 && sample !== 3) return;
 
+        let canvas;
+
+        if(!title) title = new Date().toISOString();
+        
+        if(sample === 1) { 
+            canvas = this.querySelector('#sample1');
+            this.comparing.sample1 = mapped;
+        }
+        else if(sample === 2) { 
+            canvas = this.querySelector('#sample2');
+            this.comparing.sample2 = mapped;
+        }
+        else if(sample === 3) { 
+            canvas = this.querySelector('#baseline');
+            this.comparing.baseline = mapped;
+        }
+
+        canvas.height = canvas.parentNode.clientHeight;
+        canvas.width = canvas.parentNode.clientWidth;
+
+        graphXIntensities(
+            canvas.getContext('2d'),
+            mapped.xrgbintensities,
+            mapped.xintmax
+        );
+
+        if(sample === 1 || sample === 2) {
+            if(this.comparing.sample1 && this.comparing.sample2) {
+                let s2_s1 = this.querySelector('#s2-s1');
+                s2_s1.height = s2_s1.parentNode.clientHeight;
+                s2_s1.width = s2_s1.parentNode.clientWidth;
+
+                this.comparing.s2_s1 = this.comparing.sample2.xrgbintensities.map((yrgbi,i) => {
+                    if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
+                    return {
+                        r: yrgbi.r - this.comparing.sample1.xrgbintensities[i].r,
+                        g: yrgbi.g - this.comparing.sample1.xrgbintensities[i].g,
+                        b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
+                        i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
+                    }
+                })
+
+                graphXIntensities(s2_s1.getContext('2d'),this.comparing.s2_s1);
+            }
+        }
+
+        if(sample === 1 || sample === 3) {
+            if(this.comparing.sample1 && this.comparing.baseline) {
+                let a1 = this.querySelector('#b-s1');
+                a1.height = a1.parentNode.clientHeight;
+                a1.width = a1.parentNode.clientWidth;
+
+                this.comparing.a1 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
+                    if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
+                    return {
+                        r: yrgbi.r - this.comparing.sample1.xrgbintensities[i].r,
+                        g: yrgbi.g - this.comparing.sample1.xrgbintensities[i].g,
+                        b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
+                        i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
+                    }
+                })
+
+                graphXIntensities(a1.getContext('2d'),this.comparing.a1);
+            }
+        }
+
+        if(sample === 2 || sample === 3) {
+            if(this.comparing.sample2 && this.comparing.baseline) {
+                let a2 = this.querySelector('#b-s2');
+                a2.height = a2.parentNode.clientHeight;
+                a2.width = a2.parentNode.clientWidth;
+
+                this.comparing.a2 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
+                    if(!this.comparing.sample2.xrgbintensities[i]) return yrgbi;
+                    return {
+                        r: yrgbi.r - this.comparing.sample2.xrgbintensities[i].r,
+                        g: yrgbi.g - this.comparing.sample2.xrgbintensities[i].g,
+                        b: yrgbi.b - this.comparing.sample2.xrgbintensities[i].b,
+                        i: yrgbi.i - this.comparing.sample2.xrgbintensities[i].i,
+                    }
+                })
+
+                graphXIntensities(a2.getContext('2d'),this.comparing.a2);
+            }
+        }
+
+        if(this.comparing.sample1 && this.comparing.sample2 && this.comparing.baseline) {
+            let d2_d1 = this.querySelector('#d2-d1');
+            d2_d1.height = d2_d1.parentNode.clientHeight;
+            d2_d1.width = d2_d1.parentNode.clientWidth;
+
+            this.comparing.d2_d1 = this.comparing.a2.map((yrgbi,i) => {
+                if(!this.comparing.a1[i]) return yrgbi;
+                return {
+                    r: yrgbi.r - this.comparing.a1[i].r,
+                    g: yrgbi.g - this.comparing.a1[i].g,
+                    b: yrgbi.b - this.comparing.a1[i].b,
+                    i: yrgbi.i - this.comparing.a1[i].i,
+                }
+            })
+
+            graphXIntensities(d2_d1.getContext('2d'),this.comparing.d2_d1);
+        }
+
+        return canvas;
     }
 
 

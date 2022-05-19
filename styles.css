@@ -23,6 +23,16 @@ select {
     color:white;
 }
 
+td {
+    border:2px solid gray;
+    padding:3px;
+    border-radius:3px;
+}
+
+td > canvas {
+    background-color: black;
+}
+
 spectrometer-node {
     width: 100%;
     height: 100%;
