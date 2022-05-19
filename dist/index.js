@@ -50,13 +50,14 @@ frame buffering stuff cuz graphs\r
             <button id="webcam">Use Camera \u{1F3A5}</button>\r
             <button id="fileinput">Upload File \u{1F4E5}</button>\r
             <button id="useurl">Use URL \u{1F310}</button>\r
-            <button id="image">Use Image \u{1F5BC}\uFE0F</button>\r
             <button style="float:right;" id="help" title="Help!">\u2753</button>\r
-            <span id="imgmenu">\r
-                <span style="color:white;">Preloaded Images:</span>\r
-                <select id="imgselect"></select>\r
-            </span>\r
-            <span id="urlmenu" style="display:none;">\r
+            <span id="urlmenu">\r
+                <br>\r
+                <button id="image">Use Image \u{1F5BC}\uFE0F</button>\r
+                <span id="imgmenu">\r
+                    <span style="color:white;">Preloaded Images:</span>\r
+                    <select id="imgselect"></select>\r
+                </span>\r
                 <input type="url" id="urlinput" placeholder="Image or Video File URL"></input>\r
                 <span style="color:white;">File type:</span>\r
                 <select id="urlselect">\r
@@ -79,33 +80,33 @@ frame buffering stuff cuz graphs\r
                 <table style="height:100%; width:100%; font-size:10px;">\r
                     <tr>\r
                         <td><span>Sample 1<button id="sample1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="sample1" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="sample1"height="300px" width="300px"></canvas>\r
                         </td>\r
                         <td><span>Sample 2<button id="sample2csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="sample2" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="sample2"height="300px" width="300px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td colspan="2"><span>Difference: Sample 2 - Sample 1<button id="s2-s1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="s2-s1" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="s2-s1"height="300px" width="300px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td colspan="2"><span>Baseline<button id="baselinecsv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="baseline" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="baseline"height="300px" width="300px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td><span>A1: Baseline - Sample 1 (absorbance)<button id="a1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="b-s1" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="b-s1" height="300px" width="300px"></canvas>\r
                         </td>\r
                         <td><span>A2: Baseline - Sample 2 (absorbance)<button id="a2csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="b-s2" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="b-s2" height="300px" width="300px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td colspan="2"><span>Difference: A2 - A1<button id="d2-d1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="d2-d1" style="height:150px; width:100%;" height="300px" width="300px"></canvas>\r
+                            <canvas id="d2-d1" height="300px" width="300px"></canvas>\r
                         </td>\r
                     </tr>\r
                 </table>\r
