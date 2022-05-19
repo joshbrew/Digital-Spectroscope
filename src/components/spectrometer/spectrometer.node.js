@@ -861,18 +861,30 @@ export class Spectrometer extends NodeDiv {
         if(sample === 1) { 
             canvas = this.querySelector('#sample1');
             this.comparing.sample1 = mapped;
+
+            this.querySelector('#sample1csv').onclick = () => {
+                dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample1_'+title)
+            }
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
             this.comparing.sample2 = mapped;
+
+            this.querySelector('#sample2csv').onclick = () => {
+                dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample2_'+title)
+            }
         }
         else if(sample === 3) { 
             canvas = this.querySelector('#baseline');
             this.comparing.baseline = mapped;
+
+            this.querySelector('#baselinecsv').onclick = () => {
+                dumpSpectrogramsToCSV(mapped.xrgbintensities,'Baseline_'+title)
+            }
         }
 
-        canvas.height = canvas.parentNode.clientHeight;
-        canvas.width = canvas.parentNode.clientWidth;
+        canvas.height = canvas.clientHeight;
+        canvas.width = canvas.clientWidth;
 
         graphXIntensities(
             canvas.getContext('2d'),
@@ -883,8 +895,8 @@ export class Spectrometer extends NodeDiv {
         if(sample === 1 || sample === 2) {
             if(this.comparing.sample1 && this.comparing.sample2) {
                 let s2_s1 = this.querySelector('#s2-s1');
-                s2_s1.height = s2_s1.parentNode.clientHeight;
-                s2_s1.width = s2_s1.parentNode.clientWidth;
+                s2_s1.height = s2_s1.clientHeight;
+                s2_s1.width = s2_s1.clientWidth;
 
                 this.comparing.s2_s1 = this.comparing.sample2.xrgbintensities.map((yrgbi,i) => {
                     if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
@@ -894,7 +906,11 @@ export class Spectrometer extends NodeDiv {
                         b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
                         i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
                     }
-                })
+                });
+
+                this.querySelector('#s2-s1csv').onclick = () => {
+                    dumpSpectrogramsToCSV(xrgbintensities,'Difference_Sample1_vs_'+title);
+                }
 
                 graphXIntensities(s2_s1.getContext('2d'),this.comparing.s2_s1);
             }
@@ -903,8 +919,8 @@ export class Spectrometer extends NodeDiv {
         if(sample === 1 || sample === 3) {
             if(this.comparing.sample1 && this.comparing.baseline) {
                 let a1 = this.querySelector('#b-s1');
-                a1.height = a1.parentNode.clientHeight;
-                a1.width = a1.parentNode.clientWidth;
+                a1.height = a1.clientHeight;
+                a1.width = a1.clientWidth;
 
                 this.comparing.a1 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
                     if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
@@ -914,7 +930,11 @@ export class Spectrometer extends NodeDiv {
                         b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
                         i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
                     }
-                })
+                });
+
+                this.querySelector('#a1csv').onclick = () => {
+                    dumpSpectrogramsToCSV(xrgbintensities,'BaselineCorrected_'+title)
+                }
 
                 graphXIntensities(a1.getContext('2d'),this.comparing.a1);
             }
@@ -923,8 +943,8 @@ export class Spectrometer extends NodeDiv {
         if(sample === 2 || sample === 3) {
             if(this.comparing.sample2 && this.comparing.baseline) {
                 let a2 = this.querySelector('#b-s2');
-                a2.height = a2.parentNode.clientHeight;
-                a2.width = a2.parentNode.clientWidth;
+                a2.height = a2.clientHeight;
+                a2.width = a2.clientWidth;
 
                 this.comparing.a2 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
                     if(!this.comparing.sample2.xrgbintensities[i]) return yrgbi;
@@ -934,7 +954,11 @@ export class Spectrometer extends NodeDiv {
                         b: yrgbi.b - this.comparing.sample2.xrgbintensities[i].b,
                         i: yrgbi.i - this.comparing.sample2.xrgbintensities[i].i,
                     }
-                })
+                });
+
+                this.querySelector('#a2csv').onclick = () => {
+                    dumpSpectrogramsToCSV(xrgbintensities,'BaselineCorrected_'+title)
+                }
 
                 graphXIntensities(a2.getContext('2d'),this.comparing.a2);
             }
@@ -942,8 +966,8 @@ export class Spectrometer extends NodeDiv {
 
         if(this.comparing.sample1 && this.comparing.sample2 && this.comparing.baseline) {
             let d2_d1 = this.querySelector('#d2-d1');
-            d2_d1.height = d2_d1.parentNode.clientHeight;
-            d2_d1.width = d2_d1.parentNode.clientWidth;
+            d2_d1.height = d2_d1.clientHeight;
+            d2_d1.width = d2_d1.clientWidth;
 
             this.comparing.d2_d1 = this.comparing.a2.map((yrgbi,i) => {
                 if(!this.comparing.a1[i]) return yrgbi;
@@ -953,7 +977,11 @@ export class Spectrometer extends NodeDiv {
                     b: yrgbi.b - this.comparing.a1[i].b,
                     i: yrgbi.i - this.comparing.a1[i].i,
                 }
-            })
+            });
+
+            this.querySelector('#d2-d1csv').onclick = () => {
+                dumpSpectrogramsToCSV(xrgbintensities,'D2minusD1_'+title)
+            }
 
             graphXIntensities(d2_d1.getContext('2d'),this.comparing.d2_d1);
         }

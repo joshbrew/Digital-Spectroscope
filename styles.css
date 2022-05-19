@@ -33,6 +33,11 @@ td > canvas {
     background-color: black;
 }
 
+td > span > button {
+    font-size: 8px;
+    float:right;
+}
+
 spectrometer-node {
     width: 100%;
     height: 100%;
