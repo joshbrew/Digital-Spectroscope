@@ -692,6 +692,17 @@ export class Spectrometer extends NodeDiv {
     }
 
     async createBitmapCanvasWithMenu(img, parentNode, w='320px', h='180px') {
+
+        let captureheight = '30%';
+        let graphheight = '54%';
+        
+        if(!h.includes('%')) {
+            let ext = `${h[h.length-2]}${h[h.length-1]}`;
+            h = h.substring(0,h.length-2);
+            captureheight = (0.3 * parseFloat(h)) + ext;
+            graphheight = (.54 * parseFloat(h)) + ext;
+        }
+
         let template = `
         <div style='width:${w}; max-height:${h}; border: 1px solid white; border-radius:3px; padding:2px;'>
             <span style='height:6%;'>
@@ -706,8 +717,8 @@ export class Spectrometer extends NodeDiv {
                 <button id='setsample1' title='Compare as Sample 1' style='font-size:8px; float:right;'>S1</button>
                 <button id='setbaseline' title='Compare as Baseline' style='font-size:8px; float:right;'>B</button>
             </span><br>
-            <canvas id='capturecanvas' style='width:100%; max-height:30%;'></canvas>
-            <canvas id='graphcanvas' style='width:100%; height:54%; background-color:black;'></canvas>
+            <canvas id='capturecanvas' style='width:100%; max-height:${h*0.54}px;'></canvas>
+            <canvas id='graphcanvas' style='width:100%; height:${h*0.54}px; background-color:black;'></canvas>
         </div><br>`;
     
         if(typeof parentNode === 'string') {
