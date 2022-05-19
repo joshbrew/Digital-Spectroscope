@@ -82,6 +82,8 @@ frame buffering stuff cuz graphs\r
                         <td><span>Sample 1<button id="sample1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
                             <canvas id="sample1"height="300px" width="300px"></canvas>\r
                         </td>\r
+                    </tr>\r
+                    <tr>\r
                         <td><span>Sample 2<button id="sample2csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
                             <canvas id="sample2"height="300px" width="300px"></canvas>\r
                         </td>\r
@@ -100,6 +102,8 @@ frame buffering stuff cuz graphs\r
                         <td><span>A1: Baseline - Sample 1 (absorbance)<button id="a1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
                             <canvas id="b-s1" height="300px" width="300px"></canvas>\r
                         </td>\r
+                    </tr>\r
+                    <tr>\r
                         <td><span>A2: Baseline - Sample 2 (absorbance)<button id="a2csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
                             <canvas id="b-s2" height="300px" width="300px"></canvas>\r
                         </td>\r
