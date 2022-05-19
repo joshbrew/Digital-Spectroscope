@@ -748,21 +748,24 @@ export class Spectrometer extends NodeDiv {
                 this.addBitmapComparison(
                     mapped,
                     input.value,
-                    1
+                    1,
+                    canvas
                 );
             }
             parentNode.querySelector('#setsample2').onclick = () => {
                 this.addBitmapComparison(
                     mapped,
                     input.value,
-                    2
+                    2,
+                    canvas
                 );
             }
             parentNode.querySelector('#setbaseline').onclick = () => {
                 this.addBitmapComparison(
                     mapped,
                     input.value,
-                    3
+                    3,
+                    canvas
                 );
             }
     
@@ -850,7 +853,8 @@ export class Spectrometer extends NodeDiv {
     async addBitmapComparison(
         mapped, //result from createBitmapCanvasMenu provided a parentNode
         title=new Date().toISOString(), //for downloading the csv
-        sample=1 //sample 1, 2, 3 (baseline) ?
+        sample=1, //sample 1, 2, 3 (baseline) ?
+        underlayimg=undefined
     ) {
         if(sample !== 1 && sample !== 2 && sample !== 3) return;
 
@@ -885,9 +889,12 @@ export class Spectrometer extends NodeDiv {
 
         canvas.height = canvas.clientHeight;
         canvas.width = canvas.clientWidth;
+        let ctx = canvas.getContext('2d');
+
+        if(underlayimg) drawImage(ctx,underlayimg);
 
         graphXIntensities(
-            canvas.getContext('2d'),
+            ctx,
             mapped.xrgbintensities,
             mapped.xintmax
         );
