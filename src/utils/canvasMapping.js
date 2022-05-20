@@ -73,29 +73,54 @@ export function mapBitmapXIntensities(bitmapImageData) {
 
     //intensities along the x axis (summing the y column image data)
     let xrgbintensities = [];
+    let i = [];
+    let r = [];
+    let g = [];
+    let b = [];
 
     let x = 0;
 
     //srgb format
-    for(let i = 0; i < bitarr.length; i+=4) {
-        if((i/4) % bitmapImageData.width === 0) x = 0;
+    for(let j = 0; j < bitarr.length; j+=4) {
+        if((j/4) % bitmapImageData.width === 0) x = 0;
 
-        if(!xrgbintensities[x]) {
-            xrgbintensities[x] = {
-                i:parseFloat(bitarr[i]+bitarr[i+1]+bitarr[i+2]),
-                r:parseFloat(bitarr[i]),
-                g:parseFloat(bitarr[i+1]),
-                b:parseFloat(bitarr[i+2])
-            }
+        if(!i[x]) {
+            i[x]=parseFloat(bitarr[j]+bitarr[j+1]+bitarr[j+2]),
+            r[x]=parseFloat(bitarr[j]),
+            g[x]=parseFloat(bitarr[j+1]),
+            b[x]=parseFloat(bitarr[j+2])
         }
         else {
-            xrgbintensities[x].i += parseFloat(bitarr[i]+bitarr[i+1]+bitarr[i+2]);
-            xrgbintensities[x].r += parseFloat(bitarr[i]);
-            xrgbintensities[x].g += parseFloat(bitarr[i+1]);
-            xrgbintensities[x].b += parseFloat(bitarr[i+2]);
+            i[x] += parseFloat(bitarr[j]+bitarr[j+1]+bitarr[j+2]);
+            r[x] += parseFloat(bitarr[j]);
+            g[x] += parseFloat(bitarr[j+1]);
+            b[x] += parseFloat(bitarr[j+2]);
         }
         x++;
     }
+
+    function clamp(arr,max=Math.max(...arr)) { //Clamp array to max (assuming all positive and absolute values are relative to the sensor)
+        if(!max) max = Math.max(...arr);
+
+        return arr.map(v => v/max);
+    }
+
+    //we need to normalize the arrays
+    let max =  Math.max(...i);
+    i = clamp(i,max);
+    r = clamp(r,max);
+    g = clamp(g,max);
+    b = clamp(b,max);
+
+    xrgbintensities = i.map((v,j) => {
+        return {
+            i:i[j],
+            r:r[j],
+            g:g[j],
+            b:b[j]
+        }
+    })
+    
 
     let xintmax  = Math.max(...xrgbintensities.map((x) => {return x.i}));
     let xrintmax = Math.max(...xrgbintensities.map((x) => {return x.r}));
