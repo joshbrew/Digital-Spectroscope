@@ -3,9 +3,10 @@ const assets = [
   "/",
   //"/index.html",
   //"/dist/index.js",
-  "/src/assets/square.png",
-  "/src/assets/spectrum1.png"
+  //"/src/assets/square.png",
+  //"/src/assets/spectrum1.png"
 ];
+
 
 self.addEventListener("install", installEvent => {
   installEvent.waitUntil(
@@ -22,3 +23,11 @@ self.addEventListener("fetch", fetchEvent => {
     })
   );
 });
+
+// self.addEventListener('controllerchange',
+// function() {
+//   if (refreshing) return;
+//   refreshing = true;
+//   window.location.reload();
+// }
+// );

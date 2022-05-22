@@ -3,6 +3,7 @@
 import { readFileAsText, writeFile } from "./BFSUtils";
 import { CanvasToBMP } from "./CanvasToBMP";
 import { CSV } from "./csv";
+import {Math2} from 'brainsatplay-math'
 //import { Buffer } from 'buffer';
 
 //if we're clicking on a canvas and want to scale the coordinates to the image (which may be squashed or stretched to the canvas in html)
@@ -43,7 +44,7 @@ export async function captureBitmap(img, x0=0, y0=0, w, h) {
         }
     }
 
-    return await createImageBitmap(img, x0, y0, w, h);
+    return await createImageBitmap(img, x0, y0, w+1, h+1);
 }
 
 export function getCanvasBitmap(context,x0=0,y0=0,w=context.canvas.width,h=context.canvas.height) {
@@ -143,6 +144,94 @@ export function mapBitmapXIntensities(bitmapImageData) {
     }
 }
 
+export async function autocorrelateImage(bitmapImageDataArray,imageWidth,imageHeight) {
+    let arr = Array.from(bitmapImageDataArray);
+    
+    let bmp = {
+        r:[[]],g:[[]],b:[[]],s:[[]]
+    };
+    let x = 0;
+    let y = 0;
+    arr.forEach((v,i)=> {
+        if(i%4 == 0 || i == 0 )
+            bmp.r[y].push(v);
+        else if ((i-1)%4 == 0 || i == 1)
+            bmp.g[y].push(v);
+        else if ((i-2)%4 == 0 ||i == 2)
+            bmp.b[y].push(v);
+        else if ((i-3)%4 == 0 || i == 3) {
+            bmp.s[y].push(v);
+            x++;
+
+            if(x == imageWidth) {
+                x = 0;
+                y++;
+                if(y !== imageHeight) {
+                    bmp.r.push([]); bmp.g.push([]); bmp.b.push([]); bmp.s.push([]);
+                }
+            }
+        }
+        // if(i == 0 || i%4 == 0)
+        //     bmp[pidx] = { r:v };
+        // else if (i == 1 || (i-1)%4 == 0)
+        //     bmp[pidx].g = v;
+        // else if (i == 2 || (i-2)%4 == 0)
+        //     bmp[pidx].b = v;
+        // else if (i == 3 || (i-3)%4 == 0) {
+        //     bmp[pidx].s = v;
+        //     pidx++;
+        // }
+    });
+
+    let res = {
+        r:undefined,g:undefined,b:undefined,s:undefined
+    }
+
+
+    //console.log(bmp.r,bmp.g,bmp.b,bmp.s);
+    res.r = Math2.autocorrelation2d(bmp.r);
+    res.g = Math2.autocorrelation2d(bmp.g);
+    res.b = Math2.autocorrelation2d(bmp.b);
+    res.s = bmp.s;//Math2.autocorrelation2dNormalized(bmp.s);
+
+    //return res;
+
+    let resultsconcat = {r:[],g:[],b:[],s:[]};
+
+    res.r.forEach(a => resultsconcat.r.push(...a))
+    res.g.forEach(a => resultsconcat.g.push(...a))
+    res.b.forEach(a => resultsconcat.b.push(...a))
+
+    resultsconcat.r = Math2.normalizeSeries(resultsconcat.r,true).map(v => v*255);
+    resultsconcat.g = Math2.normalizeSeries(resultsconcat.g,true).map(v => v*255);
+    resultsconcat.b = Math2.normalizeSeries(resultsconcat.b,true).map(v => v*255);
+    
+    let reconstructed = [];
+
+    resultsconcat.r.forEach((v,i)=> {
+        reconstructed.push(v,resultsconcat.g[i],resultsconcat.b[i],255);
+    })
+
+    // res.r.forEach((p,i) => {
+    //     p.forEach((v,j) => {
+    //         reconstructed.push(v,res.g[i][j],res.b[i][j],0);
+    //     })
+    // })
+
+    // reconstructed = Math2.normalizeSeries(reconstructed,true).map((v,i) => {
+    //     if(i === 3 || (i-3)%4 === 0) {
+    //         return 255;
+    //     }
+    //     else return v*255        
+    // })
+
+    console.log('reconstructed',reconstructed)
+
+    return Uint8ClampedArray.from(reconstructed);
+
+    // return new ImageData(uintarr,bitmapImageData.width,bitmapImageData.height);
+
+}
 
 //browserfs back up our results from mapBitmapXIntensities to browserfs local indexeddb
 export async function backupData(mapBitmapXIntensitiesResult,title) {
@@ -175,7 +264,7 @@ export function compareBitmaps(bitmap1,bitmap2) {
     let res = new Array(arr.length);
 
     arr.forEach((v,i) => {
-        if(i%3 !== 0) {
+        if((i-1)%3 !== 0 || i !== 3) {
             res[i] = arr2[i] - arr[i];
         } else res[i] = v; //ignore the s in rgb in position 4;
     });

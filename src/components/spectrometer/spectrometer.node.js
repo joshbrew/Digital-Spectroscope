@@ -1,7 +1,7 @@
-import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV,graphXIntensities, reconstructImageData, recordCanvas, drawImage, mapBitmapXIntensities } from '../../utils/canvasMapping';
+import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV,graphXIntensities, reconstructImageData, recordCanvas, drawImage, mapBitmapXIntensities, autocorrelateImage } from '../../utils/canvasMapping';
 import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
-
+import {WorkerManager} from 'magicworker'
 
 let component = require('./spectrometer.node.html');
 
@@ -74,6 +74,7 @@ export class Spectrometer extends NodeDiv {
     template=component;
 
     props={
+        workers:new WorkerManager(2),
         picking:0,
         picked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
         imgpicked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
@@ -129,6 +130,9 @@ export class Spectrometer extends NodeDiv {
 
     //DOMElement custom callbacks:
     oncreate=(props)=>{
+
+        //this.props.workers.addFunction('autocorrelation2d',); //pass image data uint8clamped array and get a filtered image array back you can reconstruct
+
         this.canvas = this.querySelector('#picker');
         this.pickerDiv = this.querySelector('#pickerDiv');
         this.captureDiv = this.querySelector('#captureDiv');
@@ -880,6 +884,21 @@ export class Spectrometer extends NodeDiv {
             this.querySelector('#sample1csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample1_'+title)
             }
+
+            let autocorrelated = await autocorrelateImage(mapped.bitarr,mapped.width,mapped.height);
+
+            let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+
+            let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+            let offscreenctx = offscreen.getContext('2d');
+            offscreenctx.putImageData(imgdata,0,0);
+
+            let cv = this.querySelector('#sample1a');
+            cv.width = mapped.width; cv.height = mapped.height;
+            let cvx = cv.getContext('2d');
+
+            drawImage(cvx,offscreen);
+            console.log(autocorrelated);
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
