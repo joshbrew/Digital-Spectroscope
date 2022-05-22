@@ -74,7 +74,7 @@ export class Spectrometer extends NodeDiv {
     template=component;
 
     props={
-        workers:new WorkerManager(2),
+        workers:new WorkerManager(3), //3 workers + main thread = 4 threads (e.g. if your processor can handle a minimum of 4 threads (8 is typical for a 4-core processor which is common nowadays))
         picking:0,
         picked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
         imgpicked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
@@ -952,6 +952,7 @@ export class Spectrometer extends NodeDiv {
     }
 
     //pass results from mapBitmapXIntensities/graphXIntensities
+    //spaghetti-in-progress
     async addBitmapComparison(
         mapped, //result from createBitmapCanvasMenu provided a parentNode
         title=new Date().toISOString(), //for downloading the csv
@@ -971,21 +972,28 @@ export class Spectrometer extends NodeDiv {
             this.querySelector('#sample1csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample1_'+title)
             }
-            console.log(mapped.bitmap);
-            let autocorrelated = await this.props.workers.run('autocorrelateImage',[mapped.bitmap.data,mapped.width,mapped.height])
-            //console.log(worked!)
-            let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+            //console.log(mapped.bitmap);
+            
+            //run fat thread operation asynchronously
+            this.props.workers.run(
+                'autocorrelateImage',
+                [mapped.bitmap.data,mapped.width,mapped.height]
+            ).then(
+                (autocorrelated) => {
+                //console.log(worked!)
+                let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
 
-            let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
-            let offscreenctx = offscreen.getContext('2d');
-            offscreenctx.putImageData(imgdata,0,0);
+                let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+                let offscreenctx = offscreen.getContext('2d');
+                offscreenctx.putImageData(imgdata,0,0);
 
-            let cv = this.querySelector('#sample1a');
-            cv.width = mapped.width; cv.height = mapped.height;
-            let cvx = cv.getContext('2d');
+                let cv = this.querySelector('#sample1a');
+                cv.width = mapped.width; cv.height = mapped.height;
+                let cvx = cv.getContext('2d');
 
-            drawImage(cvx,offscreen);
-            //console.log(autocorrelated);
+                drawImage(cvx,offscreen);
+                //console.log(autocorrelated);
+            });
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
@@ -994,6 +1002,27 @@ export class Spectrometer extends NodeDiv {
             this.querySelector('#sample2csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample2_'+title)
             }
+                        
+            //run fat thread operation asynchronously
+            this.props.workers.run(
+                'autocorrelateImage',
+                [mapped.bitmap.data,mapped.width,mapped.height]
+            ).then(
+                (autocorrelated) => {
+                //console.log(worked!)
+                let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+
+                let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+                let offscreenctx = offscreen.getContext('2d');
+                offscreenctx.putImageData(imgdata,0,0);
+
+                let cv = this.querySelector('#sample2a');
+                cv.width = mapped.width; cv.height = mapped.height;
+                let cvx = cv.getContext('2d');
+
+                drawImage(cvx,offscreen);
+                //console.log(autocorrelated);
+            });
         }
         else if(sample === 3) { 
             canvas = this.querySelector('#baseline');
@@ -1002,6 +1031,27 @@ export class Spectrometer extends NodeDiv {
             this.querySelector('#baselinecsv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Baseline_'+title)
             }
+                   
+            //run fat thread operation asynchronously
+            this.props.workers.run(
+                'autocorrelateImage',
+                [mapped.bitmap.data,mapped.width,mapped.height]
+            ).then(
+                (autocorrelated) => {
+                //console.log(worked!)
+                let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+
+                let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+                let offscreenctx = offscreen.getContext('2d');
+                offscreenctx.putImageData(imgdata,0,0);
+
+                let cv = this.querySelector('#baselinea');
+                cv.width = mapped.width; cv.height = mapped.height;
+                let cvx = cv.getContext('2d');
+
+                drawImage(cvx,offscreen);
+                //console.log(autocorrelated);
+            });
         }
 
         canvas.height = canvas.clientHeight;
