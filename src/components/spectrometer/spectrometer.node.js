@@ -212,7 +212,7 @@ export class Spectrometer extends NodeDiv {
                 //     else return v*255        
                 // })
             
-                console.log('reconstructed',reconstructed)
+                //console.log('reconstructed',reconstructed)
             
                 return Uint8ClampedArray.from(reconstructed);
             
@@ -985,7 +985,7 @@ export class Spectrometer extends NodeDiv {
             let cvx = cv.getContext('2d');
 
             drawImage(cvx,offscreen);
-            console.log(autocorrelated);
+            //console.log(autocorrelated);
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
