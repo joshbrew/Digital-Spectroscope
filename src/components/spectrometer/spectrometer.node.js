@@ -967,6 +967,8 @@ export class Spectrometer extends NodeDiv {
         
         if(sample === 1) { 
             canvas = this.querySelector('#sample1');
+            canvas.width = mapped.width;
+            canvas.height = mapped.height;
             this.comparing.sample1 = mapped;
 
             this.querySelector('#sample1csv').onclick = () => {
@@ -997,6 +999,8 @@ export class Spectrometer extends NodeDiv {
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
+            canvas.width = mapped.width;
+            canvas.height = mapped.height;
             this.comparing.sample2 = mapped;
 
             this.querySelector('#sample2csv').onclick = () => {
@@ -1026,6 +1030,8 @@ export class Spectrometer extends NodeDiv {
         }
         else if(sample === 3) { 
             canvas = this.querySelector('#baseline');
+            canvas.width = mapped.width;
+            canvas.height = mapped.height;
             this.comparing.baseline = mapped;
 
             this.querySelector('#baselinecsv').onclick = () => {
