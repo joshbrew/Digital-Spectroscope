@@ -829,8 +829,8 @@ export class Spectrometer extends NodeDiv {
             //console.log(img);
             let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
             let graph = document.querySelector('#graphcanvas');
-            graph.width = canvas.width;
-            graph.height = canvas.height;
+            graph.width = graph.clientWidth;
+            graph.height = graph.clientHeight;
             let mapped = mapBitmapXIntensities(bmp);
             graphXIntensities(graph.getContext('2d'),mapped.xrgbintensities,mapped.xintmax);
     
