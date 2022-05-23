@@ -1,6 +1,11 @@
 import './components/components.index'
 
+import './styles.css'
+
 import {initFS} from './utils/BFSUtils'
+
+
+
 
 // import {WorkerManager} from 'magicworker'
 // let workers = new WorkerManager(1);
