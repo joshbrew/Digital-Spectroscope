@@ -790,7 +790,7 @@ export class Spectrometer extends NodeDiv {
         if(!h.includes('%')) {
             let ext = `${h[h.length-2]}${h[h.length-1]}`;
             h = h.substring(0,h.length-2);
-            captureheight = (0.3 * parseFloat(h)) + ext; console.log(captureheight)
+            captureheight = (0.3 * parseFloat(h)) + ext; //console.log(captureheight)
             graphheight = (.54 * parseFloat(h)) + ext;
         }
 
