@@ -90,9 +90,9 @@ export async function readFileChunk (filename='sessionName', dir='data', begin =
 }
 
 
-export const getFilenames = (onload=(directory)=>{}, directory = '/data') => {
+export const getFilenames = (onload=(directory)=>{}, directory = 'data') => {
     return new Promise(resolve => {
-        fs.readdir(directory, (e, dir) => {
+        fs.readdir('/'+directory, (e, dir) => {
             if (e) throw e;
             if (dir) {
                 console.log("files", dir);

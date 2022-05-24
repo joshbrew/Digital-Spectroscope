@@ -2,6 +2,7 @@ import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrograms
 import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
 import {WorkerManager} from 'magicworker'
+import { deleteFile, getFilenames, readFileAsText } from '../../utils/BFSUtils';
 
 let component = require('./spectrometer.node.html');
 
@@ -364,6 +365,8 @@ export class Spectrometer extends NodeDiv {
         
 
         this.canvas.onclick = this.canvasClicked;
+
+        this.getSavedData(); //get the saved data tile representations
 
         setTimeout(()=>{
             if(props.animate) props.node.runAnimation();
@@ -1089,7 +1092,7 @@ export class Spectrometer extends NodeDiv {
                 });
 
                 this.querySelector('#s2-s1csv').onclick = () => {
-                    dumpSpectrogramsToCSV(xrgbintensities,'Difference_Sample1_vs_'+title);
+                    dumpSpectrogramsToCSV(mapped.xrgbintensities,'Difference_Sample1_vs_'+title);
                 }
 
                 graphXIntensities(s2_s1.getContext('2d'),this.comparing.s2_s1);
@@ -1167,6 +1170,44 @@ export class Spectrometer extends NodeDiv {
         }
 
         return canvas;
+    }
+
+    getSavedData() {
+        let parentNode = this.querySelector('#savedlist');
+        getFilenames(undefined,'processed')
+        .then(
+            (dir) => {
+                dir.forEach((name) => {
+                    this.addSavedDataTile(parentNode,name);
+                })
+            });
+            
+    }
+ 
+    addSavedDataTile(parentNode, filename) {
+        parentNode.insertAdjacentHTML('afterbegin',`
+            <div id='${filename}' style='border:1px solid white; border-radius:3px; color: white;'>
+                <div>${filename}</div>
+                <button id='reconstruct'>R</button>
+                <button id='delete'>X</button>
+            </div>
+        `);
+
+        parentNode.querySelector('#reconstruct').onclick = () => {
+            readFileAsText(filename,'processed').then((text)=>{
+                let reconstructed = JSON.parse(text);
+                //returns the mapped object
+            });
+        }
+
+        parentNode.querySelector('#delete').onclick = () => {
+            deleteFile(
+                filename,
+                'processed',
+                ()=>{ parentNode.removeChild(parentNode.querySelector('#'+filename)) 
+            });
+        }
+        
     }
 
 
