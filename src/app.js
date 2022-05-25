@@ -2,7 +2,6 @@ import './components/components.index'
 
 import './styles.css'
 
-import {initFS} from './utils/BFSUtils'
 
 
 
@@ -15,9 +14,6 @@ import {initFS} from './utils/BFSUtils'
 
 //console.log(p);
 
-initFS(
-    ['processed']
-)
 
 let elm = document.createElement('spectrometer-node');
 
