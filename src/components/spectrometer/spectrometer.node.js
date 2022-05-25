@@ -2,7 +2,7 @@ import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrograms
 import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
 import {WorkerManager} from 'magicworker'
-import { deleteFile, getFilenames, readFileAsText } from '../../utils/BFSUtils';
+import { initFS, deleteFile, getFilenames, readFileAsText } from '../../utils/BFSUtils';
 
 let component = require('./spectrometer.node.html');
 
@@ -225,6 +225,7 @@ export class Spectrometer extends NodeDiv {
         this.pickerDiv = this.querySelector('#pickerDiv');
         this.captureDiv = this.querySelector('#captureDiv');
         this.imgmenu = this.querySelector('#imgmenu');
+        this.camsrc = this.querySelector('#camsrc');
         this.videomenu = this.querySelector('#videomenu');
         this.urlmenu = this.querySelector('#urlmenu');
         this.imgselect = this.querySelector('#imgselect');
@@ -246,10 +247,13 @@ export class Spectrometer extends NodeDiv {
         this.imgselect.oninput = this.useImage;
 
         this.querySelector('#useurl').onclick = () => {
-            if(this.urlmenu.style.display == 'none')
+            if(this.urlmenu.style.display == 'none'){
                 this.urlmenu.style.display = '';
-            else 
+                this.imgmenu.style.display = '';
+            } else {
                 this.urlmenu.style.display = 'none';
+                this.imgmenu.style.display = 'none';
+            }
         }
 
         this.querySelector('#help').onclick = () => {
@@ -280,8 +284,8 @@ export class Spectrometer extends NodeDiv {
 
         this.video.addEventListener('canplay', (ev)=>{
             this.props.mode = 'video';
-            this.imgmenu.style.display = 'none';
             this.videomenu.style.display = '';
+            this.imgmenu.style.display = 'none';
             this.urlmenu.style.display = 'none';
 
             this.querySelector('#sourcedeets').innerHTML = `Source Resolution: ${this.video.videoWidth}x${this.video.videoHeight}`;
@@ -365,8 +369,10 @@ export class Spectrometer extends NodeDiv {
         
 
         this.canvas.onclick = this.canvasClicked;
-
-        this.getSavedData(); //get the saved data tile representations
+     
+        initFS(
+            ['processed']
+        ).then(this.getSavedData); //get the saved data tile representations
 
         setTimeout(()=>{
             if(props.animate) props.node.runAnimation();
@@ -382,8 +388,33 @@ export class Spectrometer extends NodeDiv {
         this.img.width = 0
         setTimeout(() => {
             this.onresize() // RESIZE WHEN INITIALIZED
-            
-        }, 50)
+        }, 50);
+
+        navigator.mediaDevices.enumerateDevices()
+            .then((deviceInfos) => { //https://github.com/garrettmflynn/intensities/blob/main/app/index.js
+
+                for (var i = 0; i !== deviceInfos.length; ++i) {
+                    var deviceInfo = deviceInfos[i];
+                    var option = document.createElement('option');
+                    option.value = deviceInfo.deviceId;
+                    if (deviceInfo.kind === 'videoinput') {
+                        option.text = deviceInfo.label || 'Camera ' +
+                            (videoSelect.options.length + 1);
+                        this.camsrc.insertAdjacentElement('beforeend',option);
+                    }
+                    // if (deviceInfo.kind === 'audioinput') {
+                    //     option.text = deviceInfo.label ||
+                    //         'Microphone ' + (audioInputSelect.options.length + 1);
+                    //     this.camsrc.insertAdjacentElement('beforeend',option);
+                    // } 
+                    // else if (deviceInfo.kind === 'audiooutput') {
+                    //     option.text = deviceInfo.label || 'Speaker ' +
+                    //         (audioOutputSelect.options.length + 1);
+                    //         this.camsrc.insertAdjacentElement('beforeend',option);
+                    // } 
+                }
+                this.camsrc.onchange = this.useWebcam;
+            });
 
     }
 
@@ -444,19 +475,21 @@ export class Spectrometer extends NodeDiv {
         this.video.style.display = '';
 
         if(navigator.getUserMedia) {
+            let vidOptions = {};
+            if(this.camsrc.value) vidOptions.deviceId = this.camsrc.value;
+            else vidOptions.optional= [
+                {minWidth: 320},
+                {minWidth: 640},
+                {minWidth: 1024},
+                {minWidth: 1280},
+                {minWidth: 1920},
+                {minWidth: 2560},
+              ]
+
             navigator.getUserMedia(
                 {
                     audio:false,
-                    video:{
-                        optional: [
-                            {minWidth: 320},
-                            {minWidth: 640},
-                            {minWidth: 1024},
-                            {minWidth: 1280},
-                            {minWidth: 1920},
-                            {minWidth: 2560},
-                          ]
-                    }
+                    video:vidOptions
                 },(stream) => {
                 this.video.srcObject = stream;
                 this.video.play();
