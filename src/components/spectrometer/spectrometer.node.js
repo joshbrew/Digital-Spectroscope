@@ -1205,7 +1205,7 @@ export class Spectrometer extends NodeDiv {
         return canvas;
     }
 
-    getSavedData() {
+    getSavedData = () => {
         let parentNode = this.querySelector('#savedlist');
         getFilenames(undefined,'processed')
         .then(
