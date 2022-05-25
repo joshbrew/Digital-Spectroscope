@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "acyclicgraph": "^0.3.15",
-    "brainsatplay-math": "^0.0.16",
+    "brainsatplay-math": "^0.0.17",
     "browserfs": "^1.4.3",
     "buffer": "^6.0.3",
     "dynamicparticles": "^0.0.16",
