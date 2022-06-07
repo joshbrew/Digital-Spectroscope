@@ -7,7 +7,7 @@ html, body {
 }
 
 button {
-    border: 1px solid gold;
+    border: 1px solid rgb(161, 149, 21);
 
     background-image: linear-gradient(to right, #202020 , #505050);
     color:white;
@@ -76,7 +76,8 @@ spectrometer-node {
 }
 
 #menu {
-    background: rgb(10,10,10);
+    background-color: rgb(0,0,0);
+    background: linear-gradient(90deg, rgba(10,0,20,.05) 0%, rgba(31,0,61,.05) 4%, rgba(8,8,107,.05) 16%, rgba(0,209,251,.05) 32%, rgba(9,182,5,.05) 45%, rgba(232,229,2,.05) 67%, rgba(232,2,2,.05) 87%, rgba(32,0,0,.05) 100%);
     grid-area: controls;
     position: relative;
     transition: 0.5s;
