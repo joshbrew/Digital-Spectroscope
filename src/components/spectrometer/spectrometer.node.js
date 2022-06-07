@@ -354,7 +354,7 @@ export class Spectrometer extends NodeDiv {
             this.props.mode = 'img';
             this.imgmenu.style.display = '';
             this.videomenu.style.display = 'none';
-            this.urlmenu.style.display = 'none';
+            this.urlmenu.style.display = '';
             this.querySelector('#sourcedeets').innerHTML = `Source Resolution: ${this.img.naturalWidth}x${this.img.naturalHeight}`;
             this.onresize();
         })
@@ -910,7 +910,7 @@ export class Spectrometer extends NodeDiv {
         }
 
         let template = `
-        <div style='width:${w}; max-height:${h}; border: 1px solid white; border-radius:3px; padding:2px;'>
+        <div style='width:${w}; max-height:${h}; border: 1px solid gold; border-radius:3px; padding:2px;'>
             <span style='height:6%;'>
                 <input id='title' type='text' placeholder='Name/Tag' style='padding:4px; font-size:8px; width:15%;'>
                 <button id='savepng' title='Save PNG?' style='font-size:8px;'>🖼️(png)</button>

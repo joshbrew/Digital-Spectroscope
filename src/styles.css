@@ -7,8 +7,9 @@ html, body {
 }
 
 button {
-    border: 1px solid white;
-    background-color: #202020;
+    border: 1px solid gold;
+
+    background-image: linear-gradient(to right, #202020 , #505050);
     color:white;
     border-radius:3px;
     padding: 5px;
@@ -24,7 +25,7 @@ select {
 }
 
 td {
-    border:2px solid gray;
+    border:2px groove gray;
     padding:3px;
     border-radius:3px;
 }
