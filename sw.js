@@ -7,12 +7,12 @@ const assets = [
   //"/src/assets/spectrum1.png"
 ];
 
-// self.addEventListener("activate", event => {
-//   caches.keys().then(function(names) {
-//     for (let name of names)
-//         caches.delete(name);
-//   });
-// })
+self.addEventListener("activate", event => {
+  caches.keys().then(function(names) {
+    for (let name of names)
+        caches.delete(name);
+  });
+})
 
 self.addEventListener("install", installEvent => {
   installEvent.waitUntil(

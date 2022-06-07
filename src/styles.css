@@ -49,7 +49,7 @@ spectrometer-node {
    grid-template-areas: 
    "picker picker picker capture capture capture"
    "controls controls controls controls controls controls"
-   "compare compare captured captured captured saved";
+   "compare compare compare compare captured captured";
    background: rgb(25,25,25);
 }
 

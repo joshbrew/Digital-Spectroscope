@@ -3,6 +3,7 @@ import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
 import {WorkerManager} from 'magicworker'
 import { initFS, deleteFile, getFilenames, readFileAsText } from '../../utils/BFSUtils';
+import { Math2 } from 'brainsatplay-math';
 
 let component = require('./spectrometer.node.html');
 
@@ -132,6 +133,65 @@ export class Spectrometer extends NodeDiv {
     //DOMElement custom callbacks:
     oncreate=(props)=>{
 
+        this.props.workers.addFunction('averageImage',(self,args,origin)=>{
+
+            if(args[3]) self.averaged = args[3];
+            if(
+                args[1] !== self.image?.width || 
+                args[2] !== self.image?.height || 
+                !self.averaged
+            ) {
+                let arr = Array.from(args[0]);
+                self.image = {
+                    arr,
+                    r:[[]],g:[[]],b:[[]],s:[[]],
+                    width:args[1],
+                    height:args[2]
+                };
+                self.averaged = 1;
+                let x = 0;
+                let y = 0;
+                let bmp = self.image;
+                arr.forEach((v,i)=> {
+                    if(i%4 == 0 || i == 0 )
+                        bmp.r[y].push(v);
+                    else if ((i-1)%4 == 0 || i == 1)
+                        bmp.g[y].push(v);
+                    else if ((i-2)%4 == 0 ||i == 2)
+                        bmp.b[y].push(v);
+                    else if ((i-3)%4 == 0 || i == 3) {
+                        bmp.s[y].push(v);
+                        x++;
+            
+                        if(x == args[1]) {
+                            x = 0;
+                            y++;
+                            if(y !== args[2]) {
+                                bmp.r.push([]); bmp.g.push([]); bmp.b.push([]); bmp.s.push([]);
+                            }
+                        }
+                    }
+                });
+                //console.log(self.averaged);
+                return args[0];
+            } else {
+                //console.log(self.averaged);
+                let arr = Array.from(args[0]);
+                let avgd = self.image.arr;
+                let _avg = 1/(self.averaged+1);
+                for(let i = 0; i < arr.length; i+=4) {
+                    let ri = i; let gi = (i+1); let bi = (i+2);
+                    avgd[ri] = (avgd[ri]*self.averaged + arr[ri])*_avg; arr[ri] = avgd[ri];
+                    avgd[gi] = (avgd[gi]*self.averaged + arr[gi])*_avg; arr[gi] = avgd[gi];
+                    avgd[bi] = (avgd[bi]*self.averaged + arr[bi])*_avg; arr[bi] = avgd[bi];
+                }
+                self.averaged++;
+                return Uint8ClampedArray.from(arr);
+            }
+            
+            
+        });
+
         this.props.workers.addFunction('autocorrelateImage',(self,args,origin)=>{
                 let arr = Array.from(args[0]);
                 
@@ -198,7 +258,26 @@ export class Spectrometer extends NodeDiv {
             
                 resultsconcat.r.forEach((v,i)=> {
                     reconstructed.push(v,resultsconcat.g[i],resultsconcat.b[i],255);
-                })
+                });
+
+                // let colorct = args[1]*args[2];
+                // let result = Math2.forBufferedMat(
+                //     arr,
+                //     [colorct,colorct,colorct,colorct],
+                //     [
+                //         (v,i,ri,gi,bi,ai)=>{
+                //             let G = 0;
+                //             for (let b = 0; b < args[2]; b++) {
+                //                 for(let a = 0; a < args[1]; a++) {
+                //                     //if(a > )
+                //                     G += v * arr[b * args[1] + a]
+                //                 }
+                //             }
+
+                //             return G;
+                //         }
+                //     ]
+                // )
             
                 // res.r.forEach((p,i) => {
                 //     p.forEach((v,j) => {
@@ -863,11 +942,14 @@ export class Spectrometer extends NodeDiv {
     
             let input = document.querySelector('#title');
             //console.log(img);
-            let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
+            
             let graph = document.querySelector('#graphcanvas');
             graph.width = graph.clientWidth;
             graph.height = graph.clientHeight;
+
+            let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
             let mapped = mapBitmapXIntensities(bmp);
+
             graphXIntensities(graph.getContext('2d'),mapped.xrgbintensities,mapped.xintmax);
     
             let capture = {
@@ -1001,11 +1083,111 @@ export class Spectrometer extends NodeDiv {
 
         if(!title) title = new Date().toISOString();
         
+        
+        let onsample = () => {
+
+            if(sample === 1 || sample === 2) {
+                if(this.comparing.sample1 && this.comparing.sample2) {
+                    let s2_s1 = this.querySelector('#s2-s1');
+                    s2_s1.height = s2_s1.clientHeight;
+                    s2_s1.width = s2_s1.clientWidth;
+
+                    this.comparing.s2_s1 = this.comparing.sample2.xrgbintensities.map((yrgbi,i) => {
+                        if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
+                        return {
+                            r: yrgbi.r - this.comparing.sample1.xrgbintensities[i].r,
+                            g: yrgbi.g - this.comparing.sample1.xrgbintensities[i].g,
+                            b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
+                            i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
+                        }
+                    });
+
+                    this.querySelector('#s2-s1csv').onclick = () => {
+                        dumpSpectrogramsToCSV(this.comparing.s2_s1,'Difference_Sample1_vs_'+title);
+                    }
+
+                    graphXIntensities(s2_s1.getContext('2d'),this.comparing.s2_s1);
+                }
+            }
+
+            if(sample === 1 || sample === 3) {
+                if(this.comparing.sample1 && this.comparing.baseline) {
+                    let a1 = this.querySelector('#b-s1');
+                    a1.height = a1.clientHeight;
+                    a1.width = a1.clientWidth;
+
+                    this.comparing.a1 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
+                        if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
+                        return {
+                            r: yrgbi.r - this.comparing.sample1.xrgbintensities[i].r,
+                            g: yrgbi.g - this.comparing.sample1.xrgbintensities[i].g,
+                            b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
+                            i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
+                        }
+                    });
+
+                    this.querySelector('#a1csv').onclick = () => {
+                        dumpSpectrogramsToCSV(this.comparing.a1,'BaselineCorrected_'+title)
+                    }
+
+                    graphXIntensities(a1.getContext('2d'),this.comparing.a1);
+                }
+            }
+
+            if(sample === 2 || sample === 3) {
+                if(this.comparing.sample2 && this.comparing.baseline) {
+                    let a2 = this.querySelector('#b-s2');
+                    a2.height = a2.clientHeight;
+                    a2.width = a2.clientWidth;
+
+                    this.comparing.a2 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
+                        if(!this.comparing.sample2.xrgbintensities[i]) return yrgbi;
+                        return {
+                            r: yrgbi.r - this.comparing.sample2.xrgbintensities[i].r,
+                            g: yrgbi.g - this.comparing.sample2.xrgbintensities[i].g,
+                            b: yrgbi.b - this.comparing.sample2.xrgbintensities[i].b,
+                            i: yrgbi.i - this.comparing.sample2.xrgbintensities[i].i,
+                        }
+                    });
+
+                    this.querySelector('#a2csv').onclick = () => {
+                        dumpSpectrogramsToCSV(this.comparing.a2,'BaselineCorrected_'+title)
+                    }
+
+                    graphXIntensities(a2.getContext('2d'),this.comparing.a2);
+                }
+            }
+
+            if(this.comparing.sample1 && this.comparing.sample2 && this.comparing.baseline) {
+                let d2_d1 = this.querySelector('#d2-d1');
+                d2_d1.height = d2_d1.clientHeight;
+                d2_d1.width = d2_d1.clientWidth;
+
+                this.comparing.d2_d1 = this.comparing.a2.map((yrgbi,i) => {
+                    if(!this.comparing.a1[i]) return yrgbi;
+                    return {
+                        r: yrgbi.r - this.comparing.a1[i].r,
+                        g: yrgbi.g - this.comparing.a1[i].g,
+                        b: yrgbi.b - this.comparing.a1[i].b,
+                        i: yrgbi.i - this.comparing.a1[i].i,
+                    }
+                });
+
+                this.querySelector('#d2-d1csv').onclick = () => {
+                    dumpSpectrogramsToCSV(this.comparing.d2_d1,'D2minusD1_'+title)
+                }
+
+                graphXIntensities(d2_d1.getContext('2d'),this.comparing.d2_d1);
+            }
+        }
+
+
+
         if(sample === 1) { 
             canvas = this.querySelector('#sample1');
             canvas.width = mapped.width;
             canvas.height = mapped.height;
-            this.comparing.sample1 = mapped;
+            //this.comparing.sample1 = mapped;
 
             this.querySelector('#sample1csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample1_'+title)
@@ -1014,12 +1196,13 @@ export class Spectrometer extends NodeDiv {
             
             //run fat thread operation asynchronously
             this.props.workers.run(
-                'autocorrelateImage',
-                [mapped.bitmap.data,mapped.width,mapped.height]
+                'averageImage',
+                [mapped.bitmap.data,mapped.width,mapped.height],
+                this.props.workers.workers[0].id
             ).then(
-                (autocorrelated) => {
+                (averaged) => {
                 //console.log(worked!)
-                let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+                let imgdata = new ImageData(averaged, mapped.width,mapped.height);
 
                 let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
                 let offscreenctx = offscreen.getContext('2d');
@@ -1030,14 +1213,25 @@ export class Spectrometer extends NodeDiv {
                 let cvx = cv.getContext('2d');
 
                 drawImage(cvx,offscreen);
-                //console.log(autocorrelated);
+                //console.log(averaged);
+
+                let bmp = cvx.getImageData(0,0,cv.width,cv.height);
+                let map = mapBitmapXIntensities(bmp);
+                this.comparing.sample1 = map;
+                graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
+
+                this.querySelector('#sample1acsv').onclick = () => {
+                    dumpSpectrogramsToCSV(map.xrgbintensities,'Sample1Avgd_'+title)
+                }
+
+                onsample();
             });
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
             canvas.width = mapped.width;
             canvas.height = mapped.height;
-            this.comparing.sample2 = mapped;
+            //this.comparing.sample2 = mapped;
 
             this.querySelector('#sample2csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample2_'+title)
@@ -1045,12 +1239,13 @@ export class Spectrometer extends NodeDiv {
                         
             //run fat thread operation asynchronously
             this.props.workers.run(
-                'autocorrelateImage',
-                [mapped.bitmap.data,mapped.width,mapped.height]
+                'averageImage',
+                [mapped.bitmap.data,mapped.width,mapped.height],
+                this.props.workers.workers[1].id
             ).then(
-                (autocorrelated) => {
+                (averaged) => {
                 //console.log(worked!)
-                let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+                let imgdata = new ImageData(averaged, mapped.width,mapped.height);
 
                 let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
                 let offscreenctx = offscreen.getContext('2d');
@@ -1061,14 +1256,24 @@ export class Spectrometer extends NodeDiv {
                 let cvx = cv.getContext('2d');
 
                 drawImage(cvx,offscreen);
-                //console.log(autocorrelated);
+                //console.log(averaged);
+                let bmp = cvx.getImageData(0,0,cv.width,cv.height);
+                let map = mapBitmapXIntensities(bmp);
+                this.comparing.sample2 = map;
+                graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
+
+                this.querySelector('#sample2acsv').onclick = () => {
+                    dumpSpectrogramsToCSV(map.xrgbintensities,'Sample2Avgd_'+title)
+                }
+
+                onsample();
             });
         }
         else if(sample === 3) { 
             canvas = this.querySelector('#baseline');
             canvas.width = mapped.width;
             canvas.height = mapped.height;
-            this.comparing.baseline = mapped;
+            //this.comparing.baseline = mapped;
 
             this.querySelector('#baselinecsv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Baseline_'+title)
@@ -1076,12 +1281,13 @@ export class Spectrometer extends NodeDiv {
                    
             //run fat thread operation asynchronously
             this.props.workers.run(
-                'autocorrelateImage',
-                [mapped.bitmap.data,mapped.width,mapped.height]
+                'averageImage',
+                [mapped.bitmap.data,mapped.width,mapped.height],
+                this.props.workers.workers[2].id
             ).then(
-                (autocorrelated) => {
+                (averaged) => {
                 //console.log(worked!)
-                let imgdata = new ImageData(autocorrelated, mapped.width,mapped.height);
+                let imgdata = new ImageData(averaged, mapped.width,mapped.height);
 
                 let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
                 let offscreenctx = offscreen.getContext('2d');
@@ -1092,7 +1298,17 @@ export class Spectrometer extends NodeDiv {
                 let cvx = cv.getContext('2d');
 
                 drawImage(cvx,offscreen);
-                //console.log(autocorrelated);
+                //console.log(averaged);
+                let bmp = cvx.getImageData(0,0,cv.width,cv.height);
+                let map = mapBitmapXIntensities(bmp);
+                this.comparing.baseline = map;
+                graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
+
+                this.querySelector('#baselineacsv').onclick = () => {
+                    dumpSpectrogramsToCSV(map.xrgbintensities,'BaselineAvgd_'+title)
+                }
+
+                onsample();
             });
         }
 
@@ -1107,100 +1323,6 @@ export class Spectrometer extends NodeDiv {
             mapped.xrgbintensities,
             mapped.xintmax
         );
-
-        if(sample === 1 || sample === 2) {
-            if(this.comparing.sample1 && this.comparing.sample2) {
-                let s2_s1 = this.querySelector('#s2-s1');
-                s2_s1.height = s2_s1.clientHeight;
-                s2_s1.width = s2_s1.clientWidth;
-
-                this.comparing.s2_s1 = this.comparing.sample2.xrgbintensities.map((yrgbi,i) => {
-                    if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
-                    return {
-                        r: yrgbi.r - this.comparing.sample1.xrgbintensities[i].r,
-                        g: yrgbi.g - this.comparing.sample1.xrgbintensities[i].g,
-                        b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
-                        i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
-                    }
-                });
-
-                this.querySelector('#s2-s1csv').onclick = () => {
-                    dumpSpectrogramsToCSV(mapped.xrgbintensities,'Difference_Sample1_vs_'+title);
-                }
-
-                graphXIntensities(s2_s1.getContext('2d'),this.comparing.s2_s1);
-            }
-        }
-
-        if(sample === 1 || sample === 3) {
-            if(this.comparing.sample1 && this.comparing.baseline) {
-                let a1 = this.querySelector('#b-s1');
-                a1.height = a1.clientHeight;
-                a1.width = a1.clientWidth;
-
-                this.comparing.a1 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
-                    if(!this.comparing.sample1.xrgbintensities[i]) return yrgbi;
-                    return {
-                        r: yrgbi.r - this.comparing.sample1.xrgbintensities[i].r,
-                        g: yrgbi.g - this.comparing.sample1.xrgbintensities[i].g,
-                        b: yrgbi.b - this.comparing.sample1.xrgbintensities[i].b,
-                        i: yrgbi.i - this.comparing.sample1.xrgbintensities[i].i,
-                    }
-                });
-
-                this.querySelector('#a1csv').onclick = () => {
-                    dumpSpectrogramsToCSV(xrgbintensities,'BaselineCorrected_'+title)
-                }
-
-                graphXIntensities(a1.getContext('2d'),this.comparing.a1);
-            }
-        }
-
-        if(sample === 2 || sample === 3) {
-            if(this.comparing.sample2 && this.comparing.baseline) {
-                let a2 = this.querySelector('#b-s2');
-                a2.height = a2.clientHeight;
-                a2.width = a2.clientWidth;
-
-                this.comparing.a2 = this.comparing.baseline.xrgbintensities.map((yrgbi,i) => {
-                    if(!this.comparing.sample2.xrgbintensities[i]) return yrgbi;
-                    return {
-                        r: yrgbi.r - this.comparing.sample2.xrgbintensities[i].r,
-                        g: yrgbi.g - this.comparing.sample2.xrgbintensities[i].g,
-                        b: yrgbi.b - this.comparing.sample2.xrgbintensities[i].b,
-                        i: yrgbi.i - this.comparing.sample2.xrgbintensities[i].i,
-                    }
-                });
-
-                this.querySelector('#a2csv').onclick = () => {
-                    dumpSpectrogramsToCSV(xrgbintensities,'BaselineCorrected_'+title)
-                }
-
-                graphXIntensities(a2.getContext('2d'),this.comparing.a2);
-            }
-        }
-
-        if(this.comparing.sample1 && this.comparing.sample2 && this.comparing.baseline) {
-            let d2_d1 = this.querySelector('#d2-d1');
-            d2_d1.height = d2_d1.clientHeight;
-            d2_d1.width = d2_d1.clientWidth;
-
-            this.comparing.d2_d1 = this.comparing.a2.map((yrgbi,i) => {
-                if(!this.comparing.a1[i]) return yrgbi;
-                return {
-                    r: yrgbi.r - this.comparing.a1[i].r,
-                    g: yrgbi.g - this.comparing.a1[i].g,
-                    b: yrgbi.b - this.comparing.a1[i].b,
-                    i: yrgbi.i - this.comparing.a1[i].i,
-                }
-            });
-
-            this.querySelector('#d2-d1csv').onclick = () => {
-                dumpSpectrogramsToCSV(xrgbintensities,'D2minusD1_'+title)
-            }
-
-            graphXIntensities(d2_d1.getContext('2d'),this.comparing.d2_d1);
-        }
 
         return canvas;
     }
