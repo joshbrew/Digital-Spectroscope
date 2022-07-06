@@ -7,21 +7,42 @@ import {Math2} from 'brainsatplay-math'
 //import { Buffer } from 'buffer';
 
 //if we're clicking on a canvas and want to scale the coordinates to the image (which may be squashed or stretched to the canvas in html)
-export function imgOverlayPicker(img, canvasOverlay, canvasX, canvasY, imgOffsetX=0, imgOffsetY=0) {
+export function overlayToImgPicker(img, canvasOverlay, canvasX, canvasY, imgOffsetX=0, imgOffsetY=0) {
     if(img.naturalWidth) {
         return {
-            x: img.naturalWidth * (canvasX - imgOffsetX)/canvasOverlay.width,
-            y: img.naturalHeight * (canvasY - imgOffsetY)/canvasOverlay.height
+            x: Math.round(img.naturalWidth * (canvasX - imgOffsetX)/canvasOverlay.width),
+            y: Math.round(img.naturalHeight * (canvasY - imgOffsetY)/canvasOverlay.height)
         };
     } else if (img.videoWidth) {
         return {
-            x: img.videoWidth * (canvasX - imgOffsetX)/canvasOverlay.width,
-            y: img.videoHeight * (canvasY - imgOffsetY)/canvasOverlay.height
+            x: Math.round(img.videoWidth * (canvasX - imgOffsetX)/canvasOverlay.width),
+            y: Math.round(img.videoHeight * (canvasY - imgOffsetY)/canvasOverlay.height)
         };
     } else if (img.width) {
         return {
-            x: img.width * (canvasX - imgOffsetX)/canvasOverlay.width,
-            y: img.height * (canvasY - imgOffsetY)/canvasOverlay.height
+            x: Math.round(img.width * (canvasX - imgOffsetX)/canvasOverlay.width),
+            y: Math.round(img.height * (canvasY - imgOffsetY)/canvasOverlay.height)
+        } //what I should do is account for a potentially offset image inside a canvas (e.g. if you want multiple images in a canvas)
+    }
+
+    return undefined;
+} 
+
+export function imgToOverlayPicker(img, canvasOverlay, imgX, imgY, imgOffsetX=0, imgOffsetY=0) {
+    if(img.naturalWidth) {
+        return {
+            x: Math.round(canvasOverlay.width * (imgX - imgOffsetX)/img.naturalWidth),
+            y: Math.round(canvasOverlay.height * (imgY - imgOffsetY)/img.naturalHeight)
+        };
+    } else if (img.videoWidth) {
+        return {
+            x: Math.round(canvasOverlay.width * (imgX - imgOffsetX)/img.videoWidth),
+            y: Math.round(canvasOverlay.height * (imgY - imgOffsetY)/img.videoHeight)
+        };
+    } else if (img.width) {
+        return {
+            x: Math.round(canvasOverlay.width * (imgX - imgOffsetX)/img.width),
+            y: Math.round(canvasOverlay.height * (imgY - imgOffsetY)/img.height) 
         } //what I should do is account for a potentially offset image inside a canvas (e.g. if you want multiple images in a canvas)
     }
 
@@ -277,7 +298,8 @@ export function graphXIntensities(context, xrgbintensities, xintmax, xintmin, x0
 
     //console.log(xintmax);
     context.fillStyle = 'black';
-    context.lineWidth = 1;
+    if(context.canvas.height)
+    context.lineWidth = 2;
 
     //draw the x axis
 
@@ -322,7 +344,7 @@ export function graphXIntensities(context, xrgbintensities, xintmax, xintmin, x0
     context.stroke();
     
     context.strokeStyle = 'tomato';
-    context.lineWidth = 1;
+    context.lineWidth = 2;
 
     context.beginPath();
 

@@ -1,14 +1,19 @@
-import { imgOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV,graphXIntensities, reconstructImageData, recordCanvas, drawImage, mapBitmapXIntensities, autocorrelateImage } from '../../utils/canvasMapping';
+import { overlayToImgPicker, imgToOverlayPicker, getBMP, convertBMPToPNG, backupData, dumpSpectrogramsToCSV,graphXIntensities, reconstructImageData, recordCanvas, drawImage, mapBitmapXIntensities } from '../../utils/canvasMapping';
 import { CanvasToBMP } from "../../utils/CanvasToBMP";
 import {NodeDiv} from '../acyclicgraph/graph.node'
 import {WorkerManager} from 'magicworker'
 import { initFS, deleteFile, getFilenames, readFileAsText } from '../../utils/BFSUtils';
-import { Math2 } from 'brainsatplay-math';
+// import { Math2 } from 'brainsatplay-math';
 
 let component = require('./spectrometer.node.html');
 
 //TODO:
 /*
+
+    - Set manual coordinates for capture zone for easier consistency between samples
+
+    - Make labels and a thread per label to average the images
+
     - Image mixing and comparing, e.g. normalizing and cancelling out ambient intensities then doing variance between two corrected images to look at similarity. 
         Visual confirmation can be quicker than data driven analysis in the field!
     
@@ -72,6 +77,9 @@ export class Spectrometer extends NodeDiv {
         a2_a1:undefined
     } //images being compared and their current settings
 
+    labels = {
+    }
+
     //set the template string or function (which can input props to return a modified string)
     template=component;
 
@@ -80,7 +88,7 @@ export class Spectrometer extends NodeDiv {
         picking:0,
         picked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
         imgpicked:{x0:undefined,x1:undefined,y0:undefined,y1:undefined},
-        running:false,//running capture loop?
+        running:false, //running capture loop?
         mode:'img',
         animation:(input,node,origin,cmd) => {
 
@@ -133,172 +141,10 @@ export class Spectrometer extends NodeDiv {
     //DOMElement custom callbacks:
     oncreate=(props)=>{
 
-        this.props.workers.addFunction('averageImage',(self,args,origin)=>{
 
-            if(args[3]) self.averaged = args[3];
-            if(
-                args[1] !== self.image?.width || 
-                args[2] !== self.image?.height || 
-                !self.averaged
-            ) {
-                let arr = Array.from(args[0]);
-                self.image = {
-                    arr,
-                    r:[[]],g:[[]],b:[[]],s:[[]],
-                    width:args[1],
-                    height:args[2]
-                };
-                self.averaged = 1;
-                let x = 0;
-                let y = 0;
-                let bmp = self.image;
-                arr.forEach((v,i)=> {
-                    if(i%4 == 0 || i == 0 )
-                        bmp.r[y].push(v);
-                    else if ((i-1)%4 == 0 || i == 1)
-                        bmp.g[y].push(v);
-                    else if ((i-2)%4 == 0 ||i == 2)
-                        bmp.b[y].push(v);
-                    else if ((i-3)%4 == 0 || i == 3) {
-                        bmp.s[y].push(v);
-                        x++;
-            
-                        if(x == args[1]) {
-                            x = 0;
-                            y++;
-                            if(y !== args[2]) {
-                                bmp.r.push([]); bmp.g.push([]); bmp.b.push([]); bmp.s.push([]);
-                            }
-                        }
-                    }
-                });
-                //console.log(self.averaged);
-                return args[0];
-            } else {
-                //console.log(self.averaged);
-                let arr = Array.from(args[0]);
-                let avgd = self.image.arr;
-                let _avg = 1/(self.averaged+1);
-                for(let i = 0; i < arr.length; i+=4) {
-                    let ri = i; let gi = (i+1); let bi = (i+2);
-                    avgd[ri] = (avgd[ri]*self.averaged + arr[ri])*_avg; arr[ri] = avgd[ri];
-                    avgd[gi] = (avgd[gi]*self.averaged + arr[gi])*_avg; arr[gi] = avgd[gi];
-                    avgd[bi] = (avgd[bi]*self.averaged + arr[bi])*_avg; arr[bi] = avgd[bi];
-                }
-                self.averaged++;
-                return Uint8ClampedArray.from(arr);
-            }
-            
-            
-        });
+        this.props.workers.addFunction('averageImage',this.averageImage);
 
-        this.props.workers.addFunction('autocorrelateImage',(self,args,origin)=>{
-                let arr = Array.from(args[0]);
-                
-                let bmp = {
-                    r:[[]],g:[[]],b:[[]],s:[[]]
-                };
-                let x = 0;
-                let y = 0;
-                arr.forEach((v,i)=> {
-                    if(i%4 == 0 || i == 0 )
-                        bmp.r[y].push(v);
-                    else if ((i-1)%4 == 0 || i == 1)
-                        bmp.g[y].push(v);
-                    else if ((i-2)%4 == 0 ||i == 2)
-                        bmp.b[y].push(v);
-                    else if ((i-3)%4 == 0 || i == 3) {
-                        bmp.s[y].push(v);
-                        x++;
-            
-                        if(x == args[1]) {
-                            x = 0;
-                            y++;
-                            if(y !== args[2]) {
-                                bmp.r.push([]); bmp.g.push([]); bmp.b.push([]); bmp.s.push([]);
-                            }
-                        }
-                    }
-                    // if(i == 0 || i%4 == 0)
-                    //     bmp[pidx] = { r:v };
-                    // else if (i == 1 || (i-1)%4 == 0)
-                    //     bmp[pidx].g = v;
-                    // else if (i == 2 || (i-2)%4 == 0)
-                    //     bmp[pidx].b = v;
-                    // else if (i == 3 || (i-3)%4 == 0) {
-                    //     bmp[pidx].s = v;
-                    //     pidx++;
-                    // }
-                });
-            
-                let res = {
-                    r:undefined,g:undefined,b:undefined,s:undefined
-                }
-            
-            
-                //console.log(bmp.r,bmp.g,bmp.b,bmp.s);
-                res.r = self.Math2.autocorrelation2d(bmp.r);
-                res.g = self.Math2.autocorrelation2d(bmp.g);
-                res.b = self.Math2.autocorrelation2d(bmp.b);
-                res.s = bmp.s;//Math2.autocorrelation2dNormalized(bmp.s);
-            
-                //return res;
-            
-                let resultsconcat = {r:[],g:[],b:[],s:[]};
-            
-                res.r.forEach(a => resultsconcat.r.push(...a))
-                res.g.forEach(a => resultsconcat.g.push(...a))
-                res.b.forEach(a => resultsconcat.b.push(...a))
-            
-                resultsconcat.r = self.Math2.normalizeSeries(resultsconcat.r,true).map(v => v*255);
-                resultsconcat.g = self.Math2.normalizeSeries(resultsconcat.g,true).map(v => v*255);
-                resultsconcat.b = self.Math2.normalizeSeries(resultsconcat.b,true).map(v => v*255);
-                
-                let reconstructed = [];
-            
-                resultsconcat.r.forEach((v,i)=> {
-                    reconstructed.push(v,resultsconcat.g[i],resultsconcat.b[i],255);
-                });
-
-                // let colorct = args[1]*args[2];
-                // let result = Math2.forBufferedMat(
-                //     arr,
-                //     [colorct,colorct,colorct,colorct],
-                //     [
-                //         (v,i,ri,gi,bi,ai)=>{
-                //             let G = 0;
-                //             for (let b = 0; b < args[2]; b++) {
-                //                 for(let a = 0; a < args[1]; a++) {
-                //                     //if(a > )
-                //                     G += v * arr[b * args[1] + a]
-                //                 }
-                //             }
-
-                //             return G;
-                //         }
-                //     ]
-                // )
-            
-                // res.r.forEach((p,i) => {
-                //     p.forEach((v,j) => {
-                //         reconstructed.push(v,res.g[i][j],res.b[i][j],0);
-                //     })
-                // })
-            
-                // reconstructed = Math2.normalizeSeries(reconstructed,true).map((v,i) => {
-                //     if(i === 3 || (i-3)%4 === 0) {
-                //         return 255;
-                //     }
-                //     else return v*255        
-                // })
-            
-                //console.log('reconstructed',reconstructed)
-            
-                return Uint8ClampedArray.from(reconstructed);
-            
-                // return new ImageData(uintarr,bitmapImageData.width,bitmapImageData.height);
-            
-        }); //pass image data uint8clamped array and get a filtered image array back you can reconstruct
+        this.props.workers.addFunction('autocorrelateImage',this.autocorrelateImage); //pass image data uint8clamped array and get a filtered image array back you can reconstruct
 
         this.canvas = this.querySelector('#picker');
         this.pickerDiv = this.querySelector('#pickerDiv');
@@ -309,12 +155,38 @@ export class Spectrometer extends NodeDiv {
         this.urlmenu = this.querySelector('#urlmenu');
         this.imgselect = this.querySelector('#imgselect');
         this.select = this.querySelector('#imgselect');
+        
         this.capture = this.querySelector('#capture');
         this.capturectx = this.capture.getContext('2d');
+        
         this.capturegraph = this.querySelector('#capturegraph');
         this.capturegraphctx = this.capturegraph.getContext('2d');
+
+        this.labelcanvas = this.querySelector('#compareall');
+        this.labelcanvasctx = this.labelcanvas.getContext('2d');
+
         this.menu = this.querySelector('#menu');
         this.toggleMenu = this.querySelector('#toggleMenu');
+
+        this.x0inp = this.querySelector('#x0');
+        this.x1inp = this.querySelector('#x1');
+        this.y0inp = this.querySelector('#y0');
+        this.y1inp = this.querySelector('#y1');
+
+        this.setupxyinp();
+
+        this.labelInp = this.querySelector('#labelinput');
+        this.labelBtn = this.querySelector('#setlabel');
+        this.labelMenu = this.querySelector('#labels');
+        
+        this.labelBtn.onclick = () => {
+            let label = this.labelInp.value;
+            this.addLabel(label);
+        }
+
+        this.addLabel('Baseline');
+        this.addLabel('S1');
+        this.addLabel('S2');
 
         for(const key in this.imgfiles) {
             let template = `<option value="${this.imgfiles[key]}">${key}</option>`
@@ -541,6 +413,448 @@ export class Spectrometer extends NodeDiv {
     //onchanged=(props)=>{} //on props changed
     //ondelete=(props)=>{} //on element deleted. Can remove with this.delete() which runs cleanup functions
 
+    averageImage = (self,args,origin )=>{
+
+        if(args[3]) self.averaged = args[3];
+        if(
+            args[1] !== self.image?.width || 
+            args[2] !== self.image?.height || 
+            !self.averaged
+        ) {
+            let arr = Array.from(args[0]);
+            self.image = {
+                arr,
+                r:[[]],g:[[]],b:[[]],s:[[]],
+                width:args[1],
+                height:args[2]
+            };
+            self.averaged = 1;
+            let x = 0;
+            let y = 0;
+            let bmp = self.image;
+            arr.forEach((v,i)=> {
+                if(i%4 == 0 || i == 0 )
+                    bmp.r[y].push(v);
+                else if ((i-1)%4 == 0 || i == 1)
+                    bmp.g[y].push(v);
+                else if ((i-2)%4 == 0 ||i == 2)
+                    bmp.b[y].push(v);
+                else if ((i-3)%4 == 0 || i == 3) {
+                    bmp.s[y].push(v);
+                    x++;
+        
+                    if(x == args[1]) {
+                        x = 0;
+                        y++;
+                        if(y !== args[2]) {
+                            bmp.r.push([]); bmp.g.push([]); bmp.b.push([]); bmp.s.push([]);
+                        }
+                    }
+                }
+            });
+            //console.log(self.averaged);
+            return args[0];
+        } else {
+            //console.log(self.averaged);
+            let arr = Array.from(args[0]);
+            let avgd = self.image.arr;
+            let _avg = 1/(self.averaged+1);
+            for(let i = 0; i < arr.length; i+=4) {
+                let ri = i; let gi = (i+1); let bi = (i+2);
+                avgd[ri] = (avgd[ri]*self.averaged + arr[ri])*_avg; arr[ri] = avgd[ri];
+                avgd[gi] = (avgd[gi]*self.averaged + arr[gi])*_avg; arr[gi] = avgd[gi];
+                avgd[bi] = (avgd[bi]*self.averaged + arr[bi])*_avg; arr[bi] = avgd[bi];
+            }
+            self.averaged++;
+            return Uint8ClampedArray.from(arr);
+        }   
+    }
+
+    autocorrelateImage = (self,args,origin)=>{
+        let arr = Array.from(args[0]);
+        
+        let bmp = {
+            r:[[]],g:[[]],b:[[]],s:[[]]
+        };
+        let x = 0;
+        let y = 0;
+        arr.forEach((v,i)=> {
+            if(i%4 == 0 || i == 0 )
+                bmp.r[y].push(v);
+            else if ((i-1)%4 == 0 || i == 1)
+                bmp.g[y].push(v);
+            else if ((i-2)%4 == 0 ||i == 2)
+                bmp.b[y].push(v);
+            else if ((i-3)%4 == 0 || i == 3) {
+                bmp.s[y].push(v);
+                x++;
+    
+                if(x == args[1]) {
+                    x = 0;
+                    y++;
+                    if(y !== args[2]) {
+                        bmp.r.push([]); bmp.g.push([]); bmp.b.push([]); bmp.s.push([]);
+                    }
+                }
+            }
+            // if(i == 0 || i%4 == 0)
+            //     bmp[pidx] = { r:v };
+            // else if (i == 1 || (i-1)%4 == 0)
+            //     bmp[pidx].g = v;
+            // else if (i == 2 || (i-2)%4 == 0)
+            //     bmp[pidx].b = v;
+            // else if (i == 3 || (i-3)%4 == 0) {
+            //     bmp[pidx].s = v;
+            //     pidx++;
+            // }
+        });
+    
+        let res = {
+            r:undefined,g:undefined,b:undefined,s:undefined
+        }
+    
+    
+        //console.log(bmp.r,bmp.g,bmp.b,bmp.s);
+        res.r = self.Math2.autocorrelation2d(bmp.r);
+        res.g = self.Math2.autocorrelation2d(bmp.g);
+        res.b = self.Math2.autocorrelation2d(bmp.b);
+        res.s = bmp.s;//Math2.autocorrelation2dNormalized(bmp.s);
+    
+        //return res;
+    
+        let resultsconcat = {r:[],g:[],b:[],s:[]};
+    
+        res.r.forEach(a => resultsconcat.r.push(...a))
+        res.g.forEach(a => resultsconcat.g.push(...a))
+        res.b.forEach(a => resultsconcat.b.push(...a))
+    
+        resultsconcat.r = self.Math2.normalizeSeries(resultsconcat.r,true).map(v => v*255);
+        resultsconcat.g = self.Math2.normalizeSeries(resultsconcat.g,true).map(v => v*255);
+        resultsconcat.b = self.Math2.normalizeSeries(resultsconcat.b,true).map(v => v*255);
+        
+        let reconstructed = [];
+    
+        resultsconcat.r.forEach((v,i)=> {
+            reconstructed.push(v,resultsconcat.g[i],resultsconcat.b[i],255);
+        });
+
+        // let colorct = args[1]*args[2];
+        // let result = Math2.forBufferedMat(
+        //     arr,
+        //     [colorct,colorct,colorct,colorct],
+        //     [
+        //         (v,i,ri,gi,bi,ai)=>{
+        //             let G = 0;
+        //             for (let b = 0; b < args[2]; b++) {
+        //                 for(let a = 0; a < args[1]; a++) {
+        //                     //if(a > )
+        //                     G += v * arr[b * args[1] + a]
+        //                 }
+        //             }
+
+        //             return G;
+        //         }
+        //     ]
+        // )
+    
+        // res.r.forEach((p,i) => {
+        //     p.forEach((v,j) => {
+        //         reconstructed.push(v,res.g[i][j],res.b[i][j],0);
+        //     })
+        // })
+    
+        // reconstructed = Math2.normalizeSeries(reconstructed,true).map((v,i) => {
+        //     if(i === 3 || (i-3)%4 === 0) {
+        //         return 255;
+        //     }
+        //     else return v*255        
+        // })
+    
+        //console.log('reconstructed',reconstructed)
+    
+        return Uint8ClampedArray.from(reconstructed);
+    
+        // return new ImageData(uintarr,bitmapImageData.width,bitmapImageData.height);
+    
+}
+
+    addLabel = (label) => {
+
+            if(label) {
+                if(!this.labels[label]) {
+
+                    let wId = this.props.workers.addWorker();
+                    
+                    this.props.workers.addFunction('averageImage',this.averageImage,wId);
+
+                    this.labelMenu.insertAdjacentHTML('beforeend',`<button id='${label}btn'>${label}</button>`);
+
+                    document.getElementById(label+'btn').onclick = (ev) => {
+                        
+
+                        let imgd = this.capturectx.getImageData(0,0,this.capture.width,this.capture.height);
+                        let mapped = mapBitmapXIntensities(imgd);
+
+                        //if no canvas for this label then create new one
+
+                        this.props.workers.run(
+                            'averageImage',
+                            [mapped.bitmap.data,mapped.width,mapped.height],
+                            wId
+                        ).then((averaged) => {
+
+                            let imgdata = new ImageData(averaged, mapped.width,mapped.height);
+                                            
+                            let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+                            let offscreenctx = offscreen.getContext('2d');
+                            offscreenctx.putImageData(imgdata,0,0); //imgdata
+
+                            //console.log(averaged);
+
+
+                            if(!document.getElementById(label+'div')) {
+                                //make the component like in the other function with the label selectors
+                                this.createBitmapCanvasWithMenu(
+                                    offscreen,
+                                    this.querySelector('#capturelist'),
+                                    '100%',
+                                    undefined,
+                                    label
+                                );
+                            } else {
+                                let c = this.labels[label].canvas;
+                                c.width = this.labels[label].mapped.width;
+                                c.height = this.labels[label].mapped.height;
+
+                                let ctx = this.labels[label].context
+                                ctx.drawImage(offscreen,0,0);
+                        
+                                //console.log(img);
+                                
+                                let graph = this.labels[label].graph
+                                graph.width = graph.clientWidth;
+                                graph.height = graph.clientHeight;
+                    
+                                let bmp = ctx.getImageData(0,0,c.width,c.height);
+                                let mapped = mapBitmapXIntensities(bmp);
+                    
+                                graphXIntensities(this.labels[label].graphcontext,mapped.xrgbintensities,mapped.xintmax);
+                        
+                                this.labels[label].mapped = mapped;
+                                this.labels[label].timestamp = Date.now();
+
+                            }
+
+                            
+                            //draw any labeled mapped data spectrogram lines
+                            let cc = this.labelcanvas;
+                            this.labelcanvasctx.clearRect(0,0,cc.width,cc.height);
+                            document.getElementById('labelcolors').innerHTML = '';
+
+                      
+
+                            for(const prop in this.labels) {      
+                                let xscalar = this.labelcanvas.width / this.labels[prop].mapped.xrgbintensities.length;
+
+                                let xintmax = this.labels[prop].mapped.xintmax;
+                                let xintmin = Math.min(...this.labels[prop].mapped.xrgbintensities.map(y => y.i));
+                                if(!xintmax) {
+                                    xintmax = Math.max(...this.labels[prop].mapped.xrgbintensities.map(y => y.i));
+                                }
+                                if(xintmin > 0) xintmin = 0;
+                            
+
+                                if(this.labels[prop].mapped) {
+                                    let color = `rgb(${100+Math.random()*155},${100+Math.random()*155},${100+Math.random()*155})`;
+                                    document.getElementById('labelcolors').innerHTML += ` <span style='color:${color};'>${prop}</span>`
+                                    this.labelcanvasctx.strokeStyle = color;
+                                    this.labelcanvasctx.lineWidth = 2;
+                                    this.labelcanvasctx.beginPath();
+                                    this.labelcanvasctx.moveTo(0,this.labelcanvas.height * (1 - (this.labels[prop].mapped.xrgbintensities[0].i - xintmin)/(xintmax - xintmin) ) )
+                                    for(let i = 1; i < this.labels[prop].mapped.xrgbintensities.length; i++) {
+                                        this.labelcanvasctx.lineTo(i*xscalar, this.labelcanvas.height * (1 - (this.labels[prop].mapped.xrgbintensities[i].i - xintmin)/(xintmax - xintmin) ));
+                                    }
+                                    this.labelcanvasctx.stroke();
+                                    console.log(this.labels[prop].mapped.xrgbintensities)
+                                }
+                            }
+
+
+
+                        });
+                    }
+                }
+            }
+    }
+
+    setupxyinp = () => {
+        
+        this.x0inp.onchange = (ev) => {
+            this.props.imgpicked.x0 = ev.target.value;
+            if(this.props.imgpicked.x1) {
+                if(this.props.imgpicked.x1 < this.props.imgpicked.x0) {
+                    let temp = this.props.imgpicked.x1;
+                    this.props.imgpicked.x1 = this.props.imgpicked.x0;
+                    this.props.imgpicked.x0 = temp;
+                }
+            }
+            if(this.props.imgpicked.y0 >= 0) {
+                let picked = imgToOverlayPicker(this.img,this.canvas,this.props.imgpicked.x0,this.props.imgpicked.y0);
+                this.props.picked.x0 = picked.x;
+                this.props.picked.y0 = picked.y;
+
+                this.setX0Y0();
+
+                
+                if(this.props.picked.x0 !== undefined && this.props.picked.y0 !== undefined) {
+                    
+                    this.props.running = false;
+                    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                                
+                    this.ctx.lineWidth = 3;
+                
+                    this.ctx.beginPath();
+                    
+                    this.ctx.strokeStyle = 'orange';
+                    this.ctx.rect(
+                        this.props.picked.x0,
+                        this.props.picked.y0,
+                        Math.abs(this.props.picked.x1-this.props.picked.x0),
+                        Math.abs(this.props.picked.y1-this.props.picked.y0)
+                    );
+                    this.ctx.stroke();
+
+                    this.drawCapture();
+                }
+            }   
+        }
+
+        this.x1inp.onchange = (ev) => {
+            this.props.imgpicked.x1 = ev.target.value;
+            if(this.props.imgpicked.x0) {
+                if(this.props.imgpicked.x1 < this.props.imgpicked.x0) {
+                    let temp = this.props.imgpicked.x1;
+                    this.props.imgpicked.x1 = this.props.imgpicked.x0;
+                    this.props.imgpicked.x0 = temp;
+                }
+            }
+            if(this.props.imgpicked.y1 >= 0) {
+                let picked = imgToOverlayPicker(this.img,this.canvas,this.props.imgpicked.x1,this.props.imgpicked.y1);
+                this.props.picked.x1 = picked.x;
+                this.props.picked.y1 = picked.y;
+
+                this.setX1Y1();
+
+
+                if(this.props.picked.x0 !== undefined && this.props.picked.y0 !== undefined) {
+                    
+                    
+                    this.props.running = false;
+                    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                                
+                    this.ctx.lineWidth = 3;
+                
+                    this.ctx.beginPath();
+                    
+                    this.ctx.strokeStyle = 'orange';
+                    this.ctx.rect(
+                        this.props.picked.x0,
+                        this.props.picked.y0,
+                        Math.abs(this.props.picked.x1-this.props.picked.x0),
+                        Math.abs(this.props.picked.y1-this.props.picked.y0)
+                    );
+                    this.ctx.stroke();
+
+                    this.drawCapture();
+                }
+            }
+        }
+
+        this.y0inp.onchange = (ev) => {
+            this.props.imgpicked.y0 = ev.target.value;
+            if(this.props.imgpicked.y1) {
+                if(this.props.imgpicked.y1 < this.props.imgpicked.y0) {
+                    let temp = this.props.imgpicked.y1;
+                    this.props.imgpicked.y1 = this.props.imgpicked.y0;
+                    this.props.imgpicked.y0 = temp;
+                }
+            }
+            if(this.props.imgpicked.x0 >= 0) {
+                
+                let picked = imgToOverlayPicker(this.img,this.canvas,this.props.imgpicked.x0,this.props.imgpicked.y0);
+                
+                this.props.picked.x0 = picked.x;
+                this.props.picked.y0 = picked.y;
+                
+                this.setX0Y0();
+
+                
+                if(this.props.picked.x0 !== undefined && this.props.picked.y0 !== undefined) {
+                    
+                    this.props.running = false;
+                    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                    
+                    this.ctx.lineWidth = 3;
+                
+                    this.ctx.beginPath();
+                    
+                    this.ctx.strokeStyle = 'orange';
+                    this.ctx.rect(
+                        this.props.picked.x0,
+                        this.props.picked.y0,
+                        Math.abs(this.props.picked.x1-this.props.picked.x0),
+                        Math.abs(this.props.picked.y1-this.props.picked.y0)
+                    );
+                    this.ctx.stroke();
+
+                    this.drawCapture();
+                }
+            }   
+        }
+
+        this.y1inp.onchange = (ev) => {
+            this.props.imgpicked.y1 = ev.target.value;
+            if(this.props.imgpicked.y0) {
+                if(this.props.imgpicked.y1 < this.props.imgpicked.y0) {
+                    let temp = this.props.imgpicked.y1;
+                    this.props.imgpicked.y1 = this.props.imgpicked.y0;
+                    this.props.imgpicked.y0 = temp;
+                }
+            }
+            if(this.props.imgpicked.x1 >= 0) {
+                let picked = imgToOverlayPicker(this.img,this.canvas,this.props.imgpicked.x1,this.props.imgpicked.y1);
+                this.props.picked.x1 = picked.x;
+                this.props.picked.y1 = picked.y;
+
+                this.setX1Y1();
+
+
+                if(this.props.picked.x0 !== undefined && this.props.picked.y0 !== undefined) {
+                    
+                    
+                    this.props.running = false;
+                    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                    
+                    this.ctx.lineWidth = 3;
+                
+                    this.ctx.beginPath();
+                    
+                    this.ctx.strokeStyle = 'orange';
+                    this.ctx.rect(
+                        this.props.picked.x0,
+                        this.props.picked.y0,
+                        Math.abs(this.props.picked.x1-this.props.picked.x0),
+                        Math.abs(this.props.picked.y1-this.props.picked.y0)
+                    );
+                    this.ctx.stroke();
+
+                    this.drawCapture();
+                }
+            }
+        }
+
+    }
+
 
     useWebcam = () => {
         this.props.running = false;
@@ -555,8 +869,8 @@ export class Spectrometer extends NodeDiv {
 
         if(navigator.getUserMedia) {
             let vidOptions = {};
-            if(this.camsrc.value) vidOptions.deviceId = this.camsrc.value;
-            else vidOptions.optional= [
+            //if(this.camsrc.value) vidOptions.deviceId = this.camsrc.value;
+            vidOptions.optional= [
                 {minWidth: 320},
                 {minWidth: 640},
                 {minWidth: 1024},
@@ -570,19 +884,22 @@ export class Spectrometer extends NodeDiv {
                     audio:false,
                     video:vidOptions
                 },(stream) => {
-                this.video.srcObject = stream;
-                this.video.play();
-                this.props.mode = 'video';
-                // this.video.width = this.canvas.width;
-                // this.video.height = this.canvas.height;
-                // //this.video.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
-                // this.canvas.height = this.video.height;
-                // this.canvas.width = this.video.width;
-                //     this.canvas.style.width = this.video.style.width;
-                //     this.canvas.style.height = this.video.style.height;
-                // this.offscreen.height = this.canvas.height;
-                // this.offscreen.width = this.canvas.width;
-            },console.error);
+                    this.video.srcObject = stream;
+                    this.video.play();
+                    this.props.mode = 'video';
+
+                    this.capturegraph.width = this.video.videoWidth;
+                    this.capturegraph.height = this.video.videoHeight;
+                    // this.video.width = this.canvas.width;
+                    // this.video.height = this.canvas.height;
+                    // //this.video.height = this.video.height * this.video.videoHeight/this.video.videoWidth;
+                    // this.canvas.height = this.video.height;
+                    // this.canvas.width = this.video.width;
+                    //     this.canvas.style.width = this.video.style.width;
+                    //     this.canvas.style.height = this.video.style.height;
+                    // this.offscreen.height = this.canvas.height;
+                    // this.offscreen.width = this.canvas.width;
+                },console.error);
         }
 
     }
@@ -599,7 +916,9 @@ export class Spectrometer extends NodeDiv {
         this.img.src = this.select.options[this.select.selectedIndex].value;
         this.img.style.display = '';
         this.props.mode = 'img';
-
+            
+        this.capturegraph.width = this.img.naturalWidth;
+        this.capturegraph.height = this.img.naturalHeight;
 
         this.onresize()
     }
@@ -618,6 +937,9 @@ export class Spectrometer extends NodeDiv {
             this.img.src = input;
             this.img.style.display = '';
             this.props.mode = 'img';
+            
+            this.capturegraph.width = this.img.naturalWidth;
+            this.capturegraph.height = this.img.naturalHeight;
     
            this.onresize()
         }
@@ -639,6 +961,12 @@ export class Spectrometer extends NodeDiv {
             }
             this.video.src = input;
             this.video.play();
+
+            
+            this.capturegraph.width = this.video.videoWidth;
+            this.capturegraph.height = this.video.videoHeight;
+
+
             this.props.mode = 'video';
             this.onresize()
         }
@@ -714,62 +1042,12 @@ export class Spectrometer extends NodeDiv {
         ctx.stroke();
     }
 
-
-    canvasClicked = (ev) => {
-        this.props.running = false;
+    drawPicked = (picking=0) => {
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-        if(this.props.picking === 0) {
-            
-            this.props.picked.x0 = ev.pageX - this.canvas.offsetLeft;
-            this.props.picked.y0 = ev.pageY - this.canvas.offsetTop;
-
-            this.props.picked.x1 = undefined;
-            this.props.picked.y1 = undefined;
-            let imgpicked; 
-            if(this.props.mode === 'img') imgpicked = imgOverlayPicker(this.img,this.canvas,this.props.picked.x0,this.props.picked.y0);
-            else if (this.props.mode === 'video') imgpicked = imgOverlayPicker(this.video,this.canvas,this.props.picked.x0,this.props.picked.y0);
-
-            this.props.imgpicked.x0 = imgpicked.x;
-            this.props.imgpicked.y0 = imgpicked.y;
-
-            this.props.imgpicked.x1 = undefined;
-            this.props.imgpicked.y1 = undefined;
-
+        if(picking === 0 && this.props.picked.x0 !== undefined && this.props.picked.y0 !== undefined) {
             this.drawCircle(this.props.picked.x0, this.props.picked.y0, 2.5, 'orange', 1, 'orange'); //show targeted point
-            
-            this.props.picking = 1;
         }
-        else {
-             
-            this.props.picked.x1 = ev.pageX  - this.canvas.offsetLeft;
-            this.props.picked.y1 = ev.pageY  - this.canvas.offsetTop;
-
-            let imgpicked;
-            if(this.props.mode === 'img') imgpicked = imgOverlayPicker(this.img,this.canvas,this.props.picked.x1,this.props.picked.y1);
-            else if (this.props.mode === 'video') imgpicked = imgOverlayPicker(this.video,this.canvas,this.props.picked.x1,this.props.picked.y1);
-
-            this.props.imgpicked.x1 = imgpicked.x;
-            this.props.imgpicked.y1 = imgpicked.y;
-            
-            if(this.props.picked.x1 < this.props.picked.x0) {
-                let temp = this.props.picked.x1;
-                this.props.picked.x1 = this.props.picked.x0;
-                this.props.picked.x0 = temp;
-                temp = this.props.imgpicked.x1;
-                this.props.imgpicked.x1 = this.props.imgpicked.x0;
-                this.props.imgpicked.x0 = temp;
-            }
-            if(this.props.picked.y1 < this.props.picked.y0) {
-                let temp = this.props.picked.y1;
-                this.props.picked.y1 = this.props.picked.y0;
-                this.props.picked.y0 = temp;
-                temp = this.props.imgpicked.y1;
-                this.props.imgpicked.y1 = this.props.imgpicked.y0;
-                this.props.imgpicked.y0 = temp;
-            }
-
-            this.props.picking = 0;
-
+        else if(picking === 1 && this.props.picked.x0 !== undefined && this.props.picked.x1 !== undefined && this.props.picked.y0 !== undefined && this.props.picked.y1 !== undefined) {
             this.ctx.lineWidth = 3;
         
             this.ctx.beginPath();
@@ -782,30 +1060,119 @@ export class Spectrometer extends NodeDiv {
                 Math.abs(this.props.picked.y1-this.props.picked.y0)
             );
             this.ctx.stroke();
+        }
+    }
 
-            this.querySelector('#capturedeets').innerHTML = `Snip Resolution (actual): ${Math.round(Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0))}x${Math.round(Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0))}`
+    setX0Y0 = () => {
 
+        let imgpicked; 
+        if(this.props.mode === 'img') imgpicked = overlayToImgPicker(this.img,this.canvas,this.props.picked.x0,this.props.picked.y0);
+        else if (this.props.mode === 'video') imgpicked = overlayToImgPicker(this.video,this.canvas,this.props.picked.x0,this.props.picked.y0);
+
+        this.props.imgpicked.x0 = imgpicked.x;
+        this.props.imgpicked.y0 = imgpicked.y;
+
+        this.props.imgpicked.x1 = undefined;
+        this.props.imgpicked.y1 = undefined;
+
+        this.x0inp.value = imgpicked.x;
+        this.y0inp.value = imgpicked.y;
+    }
+
+    setX1Y1 = () => {
+        let imgpicked;
+        if(this.props.mode === 'img') imgpicked = overlayToImgPicker(this.img,this.canvas,this.props.picked.x1,this.props.picked.y1);
+        else if (this.props.mode === 'video') imgpicked = overlayToImgPicker(this.video,this.canvas,this.props.picked.x1,this.props.picked.y1);
+
+        this.props.imgpicked.x1 = imgpicked.x;
+        this.props.imgpicked.y1 = imgpicked.y;
+        
+        if(this.props.picked.x1 < this.props.picked.x0) {
+            let temp = this.props.picked.x1;
+            this.props.picked.x1 = this.props.picked.x0;
+            this.props.picked.x0 = temp;
+            temp = this.props.imgpicked.x1;
+            this.props.imgpicked.x1 = this.props.imgpicked.x0;
+            this.props.imgpicked.x0 = temp;
+        }
+        if(this.props.picked.y1 < this.props.picked.y0) {
+            let temp = this.props.picked.y1;
+            this.props.picked.y1 = this.props.picked.y0;
+            this.props.picked.y0 = temp;
+            temp = this.props.imgpicked.y1;
+            this.props.imgpicked.y1 = this.props.imgpicked.y0;
+            this.props.imgpicked.y0 = temp;
+        }
+
+        
+        this.x1inp.value = this.props.imgpicked.x1;
+        this.y1inp.value = this.props.imgpicked.y1;
+
+    }
+
+
+    drawCapture = () => {
+        
+        this.props.running = false;
+        this.querySelector('#capturedeets').innerHTML = `Snip Resolution (actual): ${Math.round(Math.abs(this.props.imgpicked.x1-this.props.imgpicked.x0))}x${Math.round(Math.abs(this.props.imgpicked.y1-this.props.imgpicked.y0))}`
           
-            //console.log(this.props.imgpicked)
-            // Scale Capture
-            this.capture.width = this.captureDiv.clientWidth; //Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
-            this.capture.height = this.captureDiv.clientHeight;  //Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
-            if(this.props.mode === 'video') {
-                this.continuousCapture(this.video); 
+        //console.log(this.props.imgpicked)
+        // Scale Capture
+        this.capture.width = this.captureDiv.clientWidth; //Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0);
+        this.capture.height = this.captureDiv.clientHeight;  //Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0)
+        if(this.props.mode === 'video') {
+            this.continuousCapture(this.video); 
+        }
+        else {
+            drawImage(
+                this.capturectx,
+                this.img,
+                this.props.imgpicked.x0,
+                this.props.imgpicked.y0,
+                Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0),
+                Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0),
+                0,0,
+                this.capture.width,
+                this.capture.height
+            )
+        }
+
+    }
+
+
+    canvasClicked = (ev) => {
+        this.props.running = false;
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+        if(this.props.picking === 0) {
+            
+            if(ev) if(ev.pageX) this.props.picked.x0 = ev.pageX - this.canvas.offsetLeft;
+            if(ev) if(ev.pageY) this.props.picked.y0 = ev.pageY - this.canvas.offsetTop;
+
+            this.props.picked.x1 = undefined;
+            this.props.picked.y1 = undefined;
+
+            this.setX0Y0();
+            
+            this.drawPicked(this.props.picking);
+            
+            this.props.picking = 1;
+        }
+        else if(this.props.picked.x0 !== undefined && this.props.picked.y0 !== undefined) {
+             
+            if(ev) if(ev.pageX) this.props.picked.x1 = ev.pageX  - this.canvas.offsetLeft;
+            if(ev) if(ev.pageY) this.props.picked.y1 = ev.pageY  - this.canvas.offsetTop;
+     
+            this.setX1Y1();
+
+            if(this.props.picked.x1 !== undefined && this.props.picked.y1 !== undefined) {
+
+                this.drawPicked(this.props.picking);
+
+                this.drawCapture();
+
             }
-            else {
-                drawImage(
-                    this.capturectx,
-                    this.img,
-                    this.props.imgpicked.x0,
-                    this.props.imgpicked.y0,
-                    Math.abs(this.props.imgpicked.x1 - this.props.imgpicked.x0),
-                    Math.abs(this.props.imgpicked.y1 - this.props.imgpicked.y0),
-                    0,0,
-                    this.capture.width,
-                    this.capture.height
-                )
-            }
+            
+            this.props.picking = 0;
 
         }
         
@@ -826,10 +1193,11 @@ export class Spectrometer extends NodeDiv {
                 let imgdata = this.capturectx.getImageData(0,0,this.capture.width,this.capture.height);
                 let mapped = mapBitmapXIntensities(imgdata);
                 graphXIntensities(
-                    this.capturectx,
+                    this.capturectx, //this.capturegraphctx
                     mapped.xrgbintensities,
                     mapped.xintmax
                 );
+                //console.log(this.capturegraphctx)
             }
             setTimeout(()=>{requestAnimationFrame(async ()=>{this.continuousCapture(img);})},33.3333);
         }
@@ -897,7 +1265,7 @@ export class Spectrometer extends NodeDiv {
 
     }
 
-    async createBitmapCanvasWithMenu(img, parentNode, w='320px', h='180px') {
+    async createBitmapCanvasWithMenu(img, parentNode, w='320px', h='180px', id='') {
 
         let captureheight = '30%';
         let graphheight = '54%';
@@ -910,21 +1278,21 @@ export class Spectrometer extends NodeDiv {
         }
 
         let template = `
-        <div style='width:${w}; max-height:${h}; border: 1px solid gold; border-radius:3px; padding:2px;'>
+        <div id='${id}div' style='width:${w}; max-height:${h}; border: 1px solid gold; border-radius:3px; padding:2px;'>
             <span style='height:6%;'>
-                <input id='title' type='text' placeholder='Name/Tag' style='padding:4px; font-size:8px; width:15%;'>
+                <input id='${id}title' type='text' value='${id}' placeholder='Name/Tag' style='padding:4px; font-size:8px; width:15%;'>
+                <button id='setsample2' title='Compare as Sample 2' style='font-size:8px; float:right;'>S2</button>
+                <button id='setsample1' title='Compare as Sample 1' style='font-size:8px; float:right;'>S1</button>
+                <button id='setbaseline' title='Compare as Baseline' style='font-size:8px; float:right;'>B</button>
                 <button id='savepng' title='Save PNG?' style='font-size:8px;'>🖼️(png)</button>
                 <button id='savecsv' title='Save CSV?' style='font-size:8px;'>📄(csv)</button>
                 <button id='savebmp' title='Save BMP?' style='font-size:8px;'>🖼️(bmp)</button>
                 <button id='backup' title='Backup (cache)?' style='font-size:8px;'>📋
                 </button><button  title='Close?' id='X' style='font-size:8px; float:right;'>❌</button>
                 <button id='toggledisplay' title='Toggle display?' style='font-size:8px; float:right;'>👓</button>
-                <button id='setsample2' title='Compare as Sample 2' style='font-size:8px; float:right;'>S2</button>
-                <button id='setsample1' title='Compare as Sample 1' style='font-size:8px; float:right;'>S1</button>
-                <button id='setbaseline' title='Compare as Baseline' style='font-size:8px; float:right;'>B</button>
             </span><br>
-            <canvas id='capturecanvas' style='width:100%; max-height:${captureheight};'></canvas>
-            <canvas id='graphcanvas' style='width:100%; height:${graphheight}; background-color:black;'></canvas>
+            <canvas id='${id}capturecanvas' style='width:100%; max-height:${captureheight};'></canvas>
+            <canvas id='${id}graphcanvas' style='width:100%; height:${graphheight}; background-color:black;'></canvas>
         </div><br>`;
     
         if(typeof parentNode === 'string') {
@@ -934,23 +1302,24 @@ export class Spectrometer extends NodeDiv {
         if(parentNode) {
             parentNode.insertAdjacentHTML('afterbegin',template);
             
-            let canvas = document.querySelector('#capturecanvas');
+            let canvas = document.querySelector('#'+id+'capturecanvas');
             canvas.width = img.width;
             canvas.height = img.height;
             let ctx = canvas.getContext('2d')
             ctx.drawImage(img,0,0);
     
-            let input = document.querySelector('#title');
+            let input = document.querySelector('#'+id+'title');
             //console.log(img);
             
-            let graph = document.querySelector('#graphcanvas');
+            let graph = document.querySelector('#'+id+'graphcanvas');
             graph.width = graph.clientWidth;
             graph.height = graph.clientHeight;
+            let gctx = graph.getContext('2d');
 
             let bmp = ctx.getImageData(0,0,canvas.width,canvas.height);
             let mapped = mapBitmapXIntensities(bmp);
 
-            graphXIntensities(graph.getContext('2d'),mapped.xrgbintensities,mapped.xintmax);
+            graphXIntensities(gctx,mapped.xrgbintensities,mapped.xintmax);
     
             let capture = {
                 node:canvas.parentNode,
@@ -958,11 +1327,30 @@ export class Spectrometer extends NodeDiv {
                 width:img.width,
                 height:img.height,
                 canvas,
+                context:ctx,
                 graph,
+                graphcontext:gctx,
                 input,
                 timestamp:Date.now(),
                 mapped
             };
+
+            if(id) this.labels[id] = capture;
+
+            // Object.keys(this.labels).forEach((l,j) => {
+            //     parentNode.querySelector('#labels').insertAdjacentHTML('beforeend',`
+            //     <button id='set${l}'>${l}</button>`)
+                
+            //     parentNode.querySelector('set'+l).onclick = () => {
+            //         this.addBitmapComparison(
+            //             mapped,
+            //             input.value,
+            //             j,
+            //             canvas
+            //         );
+            //     };
+
+            // });
 
             parentNode.querySelector('#setsample1').onclick = () => {
                 this.addBitmapComparison(
@@ -1065,8 +1453,7 @@ export class Spectrometer extends NodeDiv {
             return capture;
         }
     
-    
-        return template;
+        return undefined;
     }
 
     //pass results from mapBitmapXIntensities/graphXIntensities
@@ -1082,8 +1469,7 @@ export class Spectrometer extends NodeDiv {
         let canvas;
 
         if(!title) title = new Date().toISOString();
-        
-        
+               
         let onsample = () => {
 
             if(sample === 1 || sample === 2) {
@@ -1187,7 +1573,7 @@ export class Spectrometer extends NodeDiv {
             canvas = this.querySelector('#sample1');
             canvas.width = mapped.width;
             canvas.height = mapped.height;
-            //this.comparing.sample1 = mapped;
+            this.comparing.sample1 = mapped;
 
             this.querySelector('#sample1csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample1_'+title)
@@ -1195,121 +1581,121 @@ export class Spectrometer extends NodeDiv {
             //console.log(mapped.bitmap);
             
             //run fat thread operation asynchronously
-            this.props.workers.run(
-                'averageImage',
-                [mapped.bitmap.data,mapped.width,mapped.height],
-                this.props.workers.workers[0].id
-            ).then(
-                (averaged) => {
+            // this.props.workers.run(
+            //     'averageImage',
+            //     [mapped.bitmap.data,mapped.width,mapped.height],
+            //     this.props.workers.workers[0].id
+            // ).then(
+            //     (averaged) => {
                 //console.log(worked!)
-                let imgdata = new ImageData(averaged, mapped.width,mapped.height);
+                //let imgdata = new ImageData(averaged, mapped.width,mapped.height);
 
-                let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
-                let offscreenctx = offscreen.getContext('2d');
-                offscreenctx.putImageData(imgdata,0,0);
+            // let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+            // let offscreenctx = offscreen.getContext('2d');
+            // offscreenctx.putImageData(mapped.bitmap,0,0); //imgdata
 
-                let cv = this.querySelector('#sample1a');
-                cv.width = mapped.width; cv.height = mapped.height;
-                let cvx = cv.getContext('2d');
+            // let cv = this.querySelector('#sample1a');
+            // cv.width = mapped.width; cv.height = mapped.height;
+            // let cvx = cv.getContext('2d');
 
-                drawImage(cvx,offscreen);
-                //console.log(averaged);
+            // drawImage(cvx,offscreen);
+            // //console.log(averaged);
 
-                let bmp = cvx.getImageData(0,0,cv.width,cv.height);
-                let map = mapBitmapXIntensities(bmp);
-                this.comparing.sample1 = map;
-                graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
+            // let bmp = cvx.getImageData(0,0,cv.width,cv.height);
+            // let map = mapBitmapXIntensities(bmp);
+            // this.comparing.sample1 = map;
+            // graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
 
-                this.querySelector('#sample1acsv').onclick = () => {
-                    dumpSpectrogramsToCSV(map.xrgbintensities,'Sample1Avgd_'+title)
-                }
+            // this.querySelector('#sample1acsv').onclick = () => {
+            //     dumpSpectrogramsToCSV(map.xrgbintensities,'Sample1Avgd_'+title)
+            // }
 
-                onsample();
-            });
+            onsample();
+            //});
         }
         else if(sample === 2) { 
             canvas = this.querySelector('#sample2');
             canvas.width = mapped.width;
             canvas.height = mapped.height;
-            //this.comparing.sample2 = mapped;
+            this.comparing.sample2 = mapped;
 
             this.querySelector('#sample2csv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Sample2_'+title)
             }
                         
             //run fat thread operation asynchronously
-            this.props.workers.run(
-                'averageImage',
-                [mapped.bitmap.data,mapped.width,mapped.height],
-                this.props.workers.workers[1].id
-            ).then(
-                (averaged) => {
-                //console.log(worked!)
-                let imgdata = new ImageData(averaged, mapped.width,mapped.height);
+            // this.props.workers.run(
+            //     'averageImage',
+            //     [mapped.bitmap.data,mapped.width,mapped.height],
+            //     this.props.workers.workers[1].id
+            // ).then(
+            //     (averaged) => {
+            //     //console.log(worked!)
+            //     let imgdata = new ImageData(averaged, mapped.width,mapped.height);
 
-                let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
-                let offscreenctx = offscreen.getContext('2d');
-                offscreenctx.putImageData(imgdata,0,0);
+            // let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+            // let offscreenctx = offscreen.getContext('2d');
+            // offscreenctx.putImageData(mapped.bitmap,0,0); //imgdata
 
-                let cv = this.querySelector('#sample2a');
-                cv.width = mapped.width; cv.height = mapped.height;
-                let cvx = cv.getContext('2d');
+            // let cv = this.querySelector('#sample2a');
+            // cv.width = mapped.width; cv.height = mapped.height;
+            // let cvx = cv.getContext('2d');
 
-                drawImage(cvx,offscreen);
-                //console.log(averaged);
-                let bmp = cvx.getImageData(0,0,cv.width,cv.height);
-                let map = mapBitmapXIntensities(bmp);
-                this.comparing.sample2 = map;
-                graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
+            // drawImage(cvx,offscreen);
+            // //console.log(averaged);
+            // let bmp = cvx.getImageData(0,0,cv.width,cv.height);
+            // let map = mapBitmapXIntensities(bmp);
+            // this.comparing.sample2 = map;
+            // graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
 
-                this.querySelector('#sample2acsv').onclick = () => {
-                    dumpSpectrogramsToCSV(map.xrgbintensities,'Sample2Avgd_'+title)
-                }
+            // this.querySelector('#sample2acsv').onclick = () => {
+            //     dumpSpectrogramsToCSV(map.xrgbintensities,'Sample2Avgd_'+title)
+            // }
 
-                onsample();
-            });
+            onsample();
+            //});
         }
         else if(sample === 3) { 
             canvas = this.querySelector('#baseline');
             canvas.width = mapped.width;
             canvas.height = mapped.height;
-            //this.comparing.baseline = mapped;
+            this.comparing.baseline = mapped;
 
             this.querySelector('#baselinecsv').onclick = () => {
                 dumpSpectrogramsToCSV(mapped.xrgbintensities,'Baseline_'+title)
             }
                    
             //run fat thread operation asynchronously
-            this.props.workers.run(
-                'averageImage',
-                [mapped.bitmap.data,mapped.width,mapped.height],
-                this.props.workers.workers[2].id
-            ).then(
-                (averaged) => {
-                //console.log(worked!)
-                let imgdata = new ImageData(averaged, mapped.width,mapped.height);
+            // this.props.workers.run(
+            //     'averageImage',
+            //     [mapped.bitmap.data,mapped.width,mapped.height],
+            //     this.props.workers.workers[2].id
+            // ).then(
+            //     (averaged) => {
+            //     //console.log(worked!)
+            //     let imgdata = new ImageData(averaged, mapped.width,mapped.height);
 
-                let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
-                let offscreenctx = offscreen.getContext('2d');
-                offscreenctx.putImageData(imgdata,0,0);
+                // let offscreen = new OffscreenCanvas(mapped.width,mapped.height);
+                // let offscreenctx = offscreen.getContext('2d');
+                // offscreenctx.putImageData(mapped.bitmap,0,0); //imgdata
 
-                let cv = this.querySelector('#baselinea');
-                cv.width = mapped.width; cv.height = mapped.height;
-                let cvx = cv.getContext('2d');
+                // let cv = this.querySelector('#baselinea');
+                // cv.width = mapped.width; cv.height = mapped.height;
+                // let cvx = cv.getContext('2d');
 
-                drawImage(cvx,offscreen);
-                //console.log(averaged);
-                let bmp = cvx.getImageData(0,0,cv.width,cv.height);
-                let map = mapBitmapXIntensities(bmp);
-                this.comparing.baseline = map;
-                graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
+                // drawImage(cvx,offscreen);
+                // //console.log(averaged);
+                // let bmp = cvx.getImageData(0,0,cv.width,cv.height);
+                // let map = mapBitmapXIntensities(bmp);
+                // this.comparing.baseline = map;
+                // graphXIntensities(cvx,map.xrgbintensities,map.xintmax);
 
-                this.querySelector('#baselineacsv').onclick = () => {
-                    dumpSpectrogramsToCSV(map.xrgbintensities,'BaselineAvgd_'+title)
-                }
+                // this.querySelector('#baselineacsv').onclick = () => {
+                //     dumpSpectrogramsToCSV(map.xrgbintensities,'BaselineAvgd_'+title)
+                // }
 
-                onsample();
-            });
+            onsample();
+            //});
         }
 
         canvas.height = canvas.clientHeight;

@@ -30,23 +30,29 @@ frame buffering stuff cuz graphs
         </div>
         <div id="captureDiv" title="Capture View">
             <div style="position:absolute; z-index:5; color:white; font-size:10px;  right:0px;" id="capturedeets"></div>
-            <canvas id="capture" style="height:100%; width:100%;" height="100%" width="100%"></canvas>
-            <canvas id="capturegraph" style="position:absolute; width:100%; height:100px; z-index:5; bottom:0px;"></canvas>
+            <canvas id="capture" style="position:absolute; width:100%; height:100%;" height="100%" width="100%"></canvas>
+            <canvas id="capturegraph" style="position:absolute; z-index:10; width:100%; height:100%;" height="100%" width="100%"></canvas>
         </div>
         
         <button id="toggleMenu" style="display:none;">Toggle Menu</button>
 
         <div id="menu" title="Source controls">
-            <button id="snip" title="Capture and Analyze Spectrogram?">Analyze 💻</button>
+            <div style="color:white;">📸
+                <span id="labels"></span>
+                <input type="text" id="labelinput" placeholder="e.g. Pollock, Sea Bass"></input>
+                <button id="setlabel">Add Label</button>
+            </div> <!-- Labels are replacing the Analyze Button -->   
+            <br>      
+            <button id="snip" title="Capture and Analyze Spectrogram?" style="display:none;">Analyze 💻</button>
             <span id="videomenu" style="display:none;">
                 <select id="camsrc" title="Cam selector"></select>
                 <button id="showgraph" title="Show live spectrogram? May cause slowdown.">📈</button>
                 <button id="record" title="Record MP4 of capture? (graph not included)">🔴</button>
             </span>
+            <br>
             <button id="webcam">Use Camera 🎥</button>
             <button id="fileinput">Upload File 📥</button>
             <button id="useurl">Use URL 🌐</button>
-            <button style="float:right;" id="help" title="Help!">❓</button>
             <span id="urlmenu">
                 <br>
                 <button id="image">Use Image 🖼️</button>
@@ -62,10 +68,21 @@ frame buffering stuff cuz graphs
                 </select>
                 <button id="seturl">Set URL</button>
             </span>
+            <div>
+                <span style="color:white">
+                    X0:<input id="x0" type="number" min="0" style="width:40px;">
+                    X1:<input id="x1" type="number" min="0" style="width:40px;">
+                </span>
+                <span style="color:white">
+                    Y0:<input id="y0" type="number" min="0" style="width:40px;">
+                    Y1:<input id="y1" type="number" min="0" style="width:40px;">
+                </span>
+            </div>   
+            <button style="float:right;" id="help" title="Help!">❓</button>
             <br>
             <div id="instructions" style="color:white; display:none;">
                 Instructions: Click to draw a rectangle around the portion of the image or video you want to snip, 
-                then click Analyze to create a downloadable spectrogram you can compare with other results!
+                then click a label to create a downloadable spectrogram you can compare with other results! Each click will continuously average that image for that label.
             </div>
             <br>
         <hr>
@@ -75,25 +92,30 @@ frame buffering stuff cuz graphs
             <div id="comparelist">
                 <table style="height:100%; width:100%; font-size:10px;">
                     <tr>
-                        <td><span>Sample 1<button id="sample1csv" title='Save CSV?'>📄</button></span>
-                            <canvas id="sample1"height="300px" width="300px"></canvas>
+                        <td><span>Labeled <span id="labelcolors"></span> </span>
+                            <canvas id="compareall" height="300px" width="300px"></canvas>
                         </td>
                     </tr>
                     <tr>
+                        <td><span>Sample 1<button id="sample1csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="sample1" height="300px" width="300px"></canvas>
+                        </td>
+                    </tr>
+                    <!-- <tr>
                         <td><span>Sample 1 Averaged<button id="sample1acsv" title='Save CSV?'>📄</button></span>
                             <canvas id="sample1a"height="300px" width="300px"></canvas>
                         </td>
-                    </tr>
+                    </tr> -->
                     <tr>
                         <td><span>Sample 2<button id="sample2csv" title='Save CSV?'>📄</button></span>
                             <canvas id="sample2"height="300px" width="300px"></canvas>
                         </td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                         <td><span>Sample 2 Averaged<button id="sample2acsv" title='Save CSV?'>📄</button></span>
                             <canvas id="sample2a"height="300px" width="300px"></canvas>
                         </td>
-                    </tr>
+                    </tr> -->
                     <tr>
                         <td colspan="2"><span>Difference: Sample 2 - Sample 1<button id="s2-s1csv" title='Save CSV?'>📄</button></span>
                             <canvas id="s2-s1"height="300px" width="300px"></canvas>
@@ -104,11 +126,11 @@ frame buffering stuff cuz graphs
                             <canvas id="baseline"height="300px" width="300px"></canvas>
                         </td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                         <td><span>Baseline Averaged<button id="baselineacsv" title='Save CSV?'>📄</button></span>
                             <canvas id="baselinea"height="300px" width="300px"></canvas>
                         </td>
-                    </tr>
+                    </tr> -->
                     <tr>
                         <td><span>A1: Baseline - Sample 1 (absorbance)<button id="a1csv" title='Save CSV?'>📄</button></span>
                             <canvas id="b-s1" height="300px" width="300px"></canvas>
