@@ -5636,7 +5636,7 @@
                 };
                 IndexedDBFileSystem2.isAvailable = function isAvailable() {
                   try {
-                    return typeof indexedDB !== "undefined" && indexedDB.open("__browserfs_test__") !== null;
+                    return typeof indexedDB !== "undefined" && null !== indexedDB.open("__browserfs_test__");
                   } catch (e) {
                     return false;
                   }
@@ -12890,7 +12890,7 @@
               var source = this;
               function ondata(chunk) {
                 if (dest.writable) {
-                  if (dest.write(chunk) === false && source.pause) {
+                  if (false === dest.write(chunk) && source.pause) {
                     source.pause();
                   }
                 }
@@ -13368,7 +13368,7 @@
                   debug("ondata");
                   increasedAwaitDrain = false;
                   var ret = dest.write(chunk);
-                  if (ret === false && !increasedAwaitDrain) {
+                  if (false === ret && !increasedAwaitDrain) {
                     if ((state2.pipesCount === 1 && state2.pipes === dest || state2.pipesCount > 1 && indexOf(state2.pipes, dest) !== -1) && !cleanedUp) {
                       debug("false write response, pause", src._readableState.awaitDrain);
                       src._readableState.awaitDrain++;
@@ -13509,7 +13509,7 @@
               }
               Readable.prototype.pause = function() {
                 debug("call pause flowing=%j", this._readableState.flowing);
-                if (this._readableState.flowing !== false) {
+                if (false !== this._readableState.flowing) {
                   debug("pause");
                   this._readableState.flowing = false;
                   this.emit("pause");
@@ -14464,7 +14464,7 @@
                   return false;
                 }
                 var val = global.localStorage[name];
-                if (val == null)
+                if (null == val)
                   return false;
                 return String(val).toLowerCase() === "true";
               }
