@@ -12,10 +12,10 @@ Or `npm i -g tinybuild` then the above command.
 Software example (cropped):
 ![scrn](screenshots/tilapia_v_rockfish.PNG)
 
-My first test of a tabletop spectrometer using an Arducam with 8mm lens, 1000 line/mm off-the-shelf diffraction grating (e.g. from Amazon), black foam board, and a lot of tape:
+My first test of a tabletop spectrometer using a 1080p wifi cam, 1000 line/mm off-the-shelf diffraction grating (e.g. from Amazon), black foam board, and a lot of tape:
 ![test](screenshots/testspect.jpg)
 
-Results (sunlight through my window):
+Results - sunlight through my window:
 ![wind](screenshots/window.jpg)
 
 
@@ -25,3 +25,7 @@ By Joshua Brewster and Yassine Santissi.
 This project is being developed for creating a fish identification dataset. 
 
 ###### Sponsored by [Schmidt Marine](https://www.schmidtmarine.org/) Foundation.
+
+We recommend using the 1080p Arducam with an 8mm lens with no IR-CUT filter or night vision LEDs (you can just unplug them if they come with it). The diffraction grating is the one from children's toy science kits. The box, well we just used what was within reach... 
+
+We're going to develop our own dedicated low cost solution to help run mass data collection experiments to test fish being sold on the market for quality, correct identification, etc. purposes.
