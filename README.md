@@ -19,7 +19,7 @@ Results - sunlight through my window:
 ![wind](screenshots/window.jpg)
 
 
-By Joshua Brewster and Yassine Santissi.
+By Joshua Brewster, Yassine Santissi, and Garrett Flynn.
 
 
 This project is being developed for creating a fish identification dataset. 
