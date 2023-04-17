@@ -869,8 +869,8 @@ export class Spectrometer extends NodeDiv {
 
         if(navigator.getUserMedia) {
             let vidOptions = {};
-            //if(this.camsrc.value) vidOptions.deviceId = this.camsrc.value;
-            vidOptions.optional= [
+            if(this.camsrc.value) vidOptions.deviceId = this.camsrc.value;
+            else vidOptions.optional= [
                 {minWidth: 320},
                 {minWidth: 640},
                 {minWidth: 1024},
