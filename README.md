@@ -1,8 +1,12 @@
 Digital spectrometer workbench, works with any webcam or image/video uploads. This is a pre-alpha functional test.
 
-See the live demo at https://fishscanner.com built directly from this repo using Netlify.
+## Resources
+- [Machine Learning Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
+- [3D printable Spectrometer Viewer](https://a360.co/3FZsu7q)
+- [Spectrometer Workbench Demo](https://fishscanner.com)
+- [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
 
-Perform spectral decomposition in your browser! Inspired by the [Theremino spectrometer tutorial](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf), with a much needed update using an accessible browser framework. You can use this to build your own.
+Find the (incoming) 3D-printable STL files for the spectrometer parts in this repository. The slit uses two single-edge steel straight razor blades then screws together for whatever slit width you want. The camera is a basic Arducam without the IR-CUT filter, and the diffraction grating is cheap 1000 line/mm visible-light grating that you can find in sheets or pre-cut in children's science kits, which tapes or clues over a square that fits over the lens. 
 
 To run:
 `tinybuild`
