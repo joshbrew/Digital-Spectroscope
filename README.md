@@ -57,6 +57,7 @@ Results - sunlight through my window:
 - [Machine Learning Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
 - [3D printable Spectrometer Viewer](https://a360.co/3FZsu7q)
 - [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
+- [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
 
 ### Credits
 - 3D print files by Bernard Markus
