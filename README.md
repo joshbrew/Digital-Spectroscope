@@ -22,9 +22,10 @@ Recommended print settings:
 
 Additionally required:
 - 1080p Arducam + 10deg or 20deg M12 lens. Remove IR filters over lenses for more bandwidth.
-- The screws on the front plate for adjusting the slit are M1.6 12mm. You can use a sheet of paper as spacer.
-- Uses single edge stainless steel razor blades glued over the slit
 - 1000 line/mm diffraction grating, tape it over the rectangular piece that fits over the lenses. You can find these stock online in kid's science kits.
+- Uses single edge stainless steel razor blades glued over the slit
+- The screws on the front plate for adjusting the slit are M1.6 12mm. You can use a sheet of paper as spacer.
+- The back mounted handles use 4 M3 8mm screws. 
 
 Make sure the diffraction grating is aligned vertically with the slit. The camera rotation should be so that the image is horizontal, you can have it aligned right to left or left to right for increasing wavelength at your preference.
 
