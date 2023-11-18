@@ -1,11 +1,40 @@
-Digital spectrometer workbench, works with any webcam or image/video uploads. This is a pre-alpha functional test.
 
-See the live demo at https://fishscanner.com built directly from this repo using Netlify.
+## DIY Digital Spectroscope
 
-Perform spectral decomposition in your browser! Inspired by the [Theremino spectrometer tutorial](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf), with a much needed update using an accessible browser framework. You can use this to build your own.
+This repository contains 3D printable .3mf files (by Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved 0.1mm easily with a spacer.
+
+Slicer:
+![slicer](./screenshots/cura.PNG)
+3D model (https://a360.co/3FZsu7q):
+![device](./screenshots/Capturea.PNG)
+Flourescent light test result:
+![result](./screenshots/image-1.png)
+Print result:
+![boxa](./screenshots/boxa.jpg)
+![boxb](./screenshots/boxb.jpg)
+![boxc](./screenshots/boxc.jpg)
+
+Recommended print settings: 
+- .4mm nozzle, 
+- PLA on default settings is fine, 
+- 2 perimeters (important!), 
+- 20% infill.
+
+Additionally required:
+- 1080p Arducam + 10deg or 20deg lens. Remove IR filters over lenses for more bandwidth.
+- The screws on the front plate for adjusting the slit are M1.6 12mm
+- Uses single edge stainless steel razor blades glued over the slit
+
+## Software demo
+
+Perform digital spectral decomposition in your browser! 
+
+This repo comes with a digital spectrometer workbench prototype, works with any webcam or image/video uploads. This is a pre-alpha functional test. See the live demo at https://fishscanner.com built directly from this repo using Netlify.
+
+See also: [WONNX Camera ID Demo](https://github.com/joshbrew/cameraId-wonnx-wasm) for a real time video classifier demo, which we're working on hooking up to the spectrogram outputs as well for a proof of concept.
 
 To run:
-`tinybuild`
+`npm start` or `tinybuild`
 
 Or `npm i -g tinybuild` then the above command.
 
@@ -18,11 +47,15 @@ My first test of a tabletop spectrometer using a 1080p wifi cam, 1000 line/mm of
 Results - sunlight through my window:
 ![wind](screenshots/window.jpg)
 
+- Not yet added: wavelength estimation, etc. 
 
-By Joshua Brewster, Yassine Santissi, and Garrett Flynn.
+### Credits
+- 3D print files by Bernard Markus
+- Spectrometer software demo by Joshua Brewster and Garrett Flynn.
+- Fishazam project by Yassine Santissi.
+- This project is being developed for creating a fish identification dataset. 
 
-
-This project is being developed for creating a fish identification dataset. 
+Inspired by the [Theremino spectrometer tutorial](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf), with a much needed update using an accessible browser framework. You can use this to build your own.
 
 ###### Sponsored by [Schmidt Marine](https://www.schmidtmarine.org/) Foundation.
 
