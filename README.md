@@ -1,7 +1,7 @@
 
 ## DIY Digital Spectroscope
 
-This repository contains 3D printable .3mf files (by Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved 0.1mm easily with a spacer.
+This repository contains 3D printable .3mf files (by Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
 
 Slicer:
 ![slicer](./screenshots/cura.PNG)
