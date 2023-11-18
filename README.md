@@ -49,6 +49,12 @@ Results - sunlight through my window:
 
 - Not yet added: wavelength estimation, etc. 
 
+## Resources
+- [Spectrometer Workbench Demo](https://fishscanner.com)
+- [Machine Learning Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
+- [3D printable Spectrometer Viewer](https://a360.co/3FZsu7q)
+- [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
+
 ### Credits
 - 3D print files by Bernard Markus
 - Spectrometer software demo by Joshua Brewster and Garrett Flynn.
