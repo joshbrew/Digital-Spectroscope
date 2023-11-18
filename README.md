@@ -60,6 +60,9 @@ Results - sunlight through my window:
 - [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
 - [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
 
+All of the prototypes by Bernard:
+![prototypes](./screenshots/Captureb.PNG)
+
 ### Credits
 - 3D print files by Bernard Markus
 - Spectrometer software demo by Joshua Brewster and Garrett Flynn.
