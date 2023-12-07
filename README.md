@@ -13,6 +13,7 @@ Print result:
 ![boxa](./screenshots/boxa.jpg)
 ![boxb](./screenshots/boxb.jpg)
 ![boxc](./screenshots/boxc.jpg)
+![boxd](./screenshots/imaging.jpg)
 
 Recommended print settings: 
 - .4mm nozzle, 
