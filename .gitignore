@@ -1,3 +1,4 @@
 node_modules
 node_server/ssl/cert.pem
 node_server/ssl/key.pem
+*.gcode
