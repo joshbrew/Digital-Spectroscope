@@ -36,7 +36,7 @@ This repository contains free digital spectroscopy software and 3D printable .3m
 <table>
   <tr>
     <td>
-      <img src="./screenshots/capturea.jpg" alt="boxa" style="width: 100%;"/>
+      <img src="./screenshots/Capturea.PNG" alt="capturea" style="width: 100%;"/>
     </td>
     <td>
       <img src="./screenshots/boxa.jpg" alt="boxb" style="width: 100%;"/>
