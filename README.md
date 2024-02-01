@@ -1,19 +1,59 @@
 
-## DIY Digital Spectroscope
+# DIY Digital Spectroscopy
 
-This repository contains 3D printable .3mf files (by Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
+This repository contains free digital spectroscopy software and 3D printable .3mf files (by Davis Fay and Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
 
-Slicer:
-![slicer](./screenshots/cura.PNG)
-3D model (https://a360.co/3FZsu7q):
-![device](./screenshots/Capturea.PNG)
-Flourescent light test result:
-![result](./screenshots/image-1.png)
-Print result:
-![boxa](./screenshots/boxa.jpg)
-![boxb](./screenshots/boxb.jpg)
-![boxc](./screenshots/boxc.jpg)
-![boxd](./screenshots/imaging.jpg)
+## Resources
+- [Spectrometer Workbench Demo](https://camspectrometer.netlify.app)
+- [Machine Learning Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
+- [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
+- [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
+
+
+### Revision 2 Phone and Arducam Mounts by Davis Fay:
+
+<table>
+  <tr>
+    <td>
+      <img src="./screenshots/arducambox.jpg" alt="boxa" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/arducambox2.jpg" alt="boxb" style="width: 100%;"/>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="./screenshots/phonebox.jpg" alt="boxc" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/phonebox2.jpg" alt="boxd" style="width: 100%;"/>
+    </td>
+  </tr>
+</table>
+
+### Revision 1 by Bernard Markus:
+
+<table>
+  <tr>
+    <td>
+      <img src="./screenshots/capturea.jpg" alt="boxa" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/boxa.jpg" alt="boxb" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/boxb.jpg" alt="boxb" style="width: 100%;"/>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="./screenshots/boxc.jpg" alt="boxc" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/imaging.jpg" alt="boxd" style="width: 100%;"/>
+    </td>
+  </tr>
+</table>
 
 Recommended print settings: 
 - .4mm nozzle, 
@@ -23,6 +63,7 @@ Recommended print settings:
 
 Additionally required:
 - 1080p Arducam + 10deg or 20deg M12 lens. Remove IR filters over lenses for more bandwidth.
+- - We are still working on identifying the best off the shelf sources (they all have different presets).
 - 1000 line/mm diffraction grating, tape it over the rectangular piece that fits over the lenses. You can find these stock online in kid's science kits.
 - Uses single edge stainless steel razor blades glued over the slit
 - The screws on the front plate for adjusting the slit are M1.6 12mm. You can use a sheet of paper as spacer.
@@ -34,7 +75,7 @@ Make sure the diffraction grating is aligned vertically with the slit. The camer
 
 Perform digital spectral decomposition in your browser! 
 
-This repo comes with a digital spectrometer workbench prototype, works with any webcam or image/video uploads. This is a pre-alpha functional test. See the live demo at https://fishscanner.com built directly from this repo using Netlify.
+This repo comes with a digital spectrometer workbench prototype, works with any webcam or image/video uploads. This is a pre-alpha functional test. See the live demo at https://camspectrometer.netlify.app built directly from this repo using Netlify.
 
 See also: [WONNX Camera ID Demo](https://github.com/joshbrew/cameraId-wonnx-wasm) for a real time video classifier demo, which we're working on hooking up to the spectrogram outputs as well for a proof of concept.
 
@@ -54,14 +95,8 @@ Results - sunlight through my window:
 
 - Not yet added: wavelength estimation, etc. 
 
-## Resources
-- [Spectrometer Workbench Demo](https://fishscanner.com)
-- [Machine Learning Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
-- [3D printable Spectrometer Viewer](https://a360.co/3FZsu7q)
-- [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
-- [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
-
 All of the prototypes by Bernard:
+- [Draft Viewer from Bernard Markus](https://a360.co/3FZsu7q)
 ![prototypes](./screenshots/Captureb.PNG)
 
 ### Credits
