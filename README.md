@@ -100,7 +100,7 @@ All of the prototypes by Bernard:
 ![prototypes](./screenshots/Captureb.PNG)
 
 ### Credits
-- 3D print files by Bernard Markus
+- 3D print files by Bernard Markus and Davis Fay
 - Spectrometer software demo by Joshua Brewster and Garrett Flynn.
 - Fishazam project by Yassine Santissi.
 - This project is being developed for creating a fish identification dataset. 
