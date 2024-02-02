@@ -36,7 +36,7 @@ This repository contains free digital spectroscopy software and 3D printable .3m
 <table>
   <tr>
     <td>
-      <img src="./screenshots/capturea.jpg" alt="boxa" style="width: 100%;"/>
+      <img src="./screenshots/Capturea.PNG" alt="capturea" style="width: 100%;"/>
     </td>
     <td>
       <img src="./screenshots/boxa.jpg" alt="boxb" style="width: 100%;"/>
@@ -57,14 +57,16 @@ This repository contains free digital spectroscopy software and 3D printable .3m
 
 Recommended print settings: 
 - .4mm nozzle, 
-- PLA on default settings is fine, 
-- 2 perimeters (important!), 
+- PLA on default settings is fine.
+- 2 perimeters (important!)
 - 20% infill.
+- Use Supports on 90deg overhang areas (. Not needed anywhere else
 
 Additionally required:
 - 1080p Arducam + 10deg or 20deg M12 lens. Remove IR filters over lenses for more bandwidth.
 - - We are still working on identifying the best off the shelf sources (they all have different presets).
 - 1000 line/mm diffraction grating, tape it over the rectangular piece that fits over the lenses. You can find these stock online in kid's science kits.
+- Clip-on or keychain LED flashlight/Headlamp. [Our Preference](https://www.amazon.com/Flashlight-800Lumens-180%C2%B0Rotatable-Rechargeable-Flashlights/dp/B0B8N5BK8N?pd_rd_i=B0B8N5BK8N&psc=1&ref_=pd_bap_d_grid_rp_0_8_t)
 - Uses single edge stainless steel razor blades glued over the slit
 - The screws on the front plate for adjusting the slit are M1.6 12mm. You can use a sheet of paper as spacer.
 - The back mounted handles use 4 M3 8mm screws. 
@@ -100,7 +102,7 @@ All of the prototypes by Bernard:
 ![prototypes](./screenshots/Captureb.PNG)
 
 ### Credits
-- 3D print files by Bernard Markus
+- 3D print files by Bernard Markus and Davis Fay
 - Spectrometer software demo by Joshua Brewster and Garrett Flynn.
 - Fishazam project by Yassine Santissi.
 - This project is being developed for creating a fish identification dataset. 
