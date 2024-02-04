@@ -10,6 +10,6 @@ Updated 2023-12-14
 NOT CURRENTLY LISTED
 
 [Qty. 2] - Razor blades
-[Qty. 1] - Arducam
-[Qty. 4] - Motherboard screws for Arducam
-[Qty. 1 - 3] - Mounting clips
+[Qty. 1] - Arducam (variant wip)
+[Qty. 4] - Motherboard screws for Arducam (included w/ camera) 
+[Qty. 1] - 1000 line/mm diffraction grating (https://www.amazon.com/Rainbow-Symphony-Diffraction-Grating-Slides/dp/B00K6K3MCW/ref=sr_1_1?crid=2SOCPFXWA18OW&keywords=diffraction+grating+1000+line&qid=1706995856&sprefix=diffraction+grating+1000+line%2Caps%2C245&sr=8-1)
