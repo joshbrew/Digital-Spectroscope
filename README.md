@@ -3,12 +3,18 @@
 
 This repository contains free digital spectroscopy software and 3D printable .3mf files (by Davis Fay and Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
 
-## Resources
+## 3D Printing:
+- [3D Prints](./3D_PRINTABLE/Main%20Modules/)
+- Arducam Mount: [Materials](./3D_PRINTABLE/Main%20Modules/Required%20Hardware%20List%20-%20Arducam%20Version.txt)
+- Mobile Camera Mount: [Materials](./3D_PRINTABLE/Main%20Modules/Required%20Hardware%20List%20-%20Smartphone%20Version.txt)
+
+## Additional Resources
 - [Spectrometer Workbench Demo](https://camspectrometer.netlify.app)
-- [Machine Learning Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
+- [Machine Learning Spectral/Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
 - [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
 - [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
 
+We are working on a web based hyperspectral imaging tool on top of a proof of concept identification pipeline.
 
 ### Revision 2 Phone and Arducam Mounts by Davis Fay:
 
@@ -55,21 +61,6 @@ This repository contains free digital spectroscopy software and 3D printable .3m
   </tr>
 </table>
 
-Recommended print settings: 
-- .4mm nozzle, 
-- PLA on default settings is fine.
-- 2 perimeters (important!)
-- 20% infill.
-- Use Supports on 90deg overhang areas (. Not needed anywhere else
-
-Additionally required:
-- 1080p Arducam + 10deg or 20deg M12 lens. Remove IR filters over lenses for more bandwidth.
-- - We are still working on identifying the best off the shelf sources (they all have different presets).
-- 1000 line/mm diffraction grating, tape it over the rectangular piece that fits over the lenses. You can find these stock online in kid's science kits.
-- Clip-on or keychain LED flashlight/Headlamp. [Our Preference](https://www.amazon.com/Flashlight-800Lumens-180%C2%B0Rotatable-Rechargeable-Flashlights/dp/B0B8N5BK8N?pd_rd_i=B0B8N5BK8N&psc=1&ref_=pd_bap_d_grid_rp_0_8_t)
-- Uses single edge stainless steel razor blades glued over the slit
-- The screws on the front plate for adjusting the slit are M1.6 12mm. You can use a sheet of paper as spacer.
-- The back mounted handles use 4 M3 8mm screws. 
 
 Make sure the diffraction grating is aligned vertically with the slit. The camera rotation should be so that the image is horizontal, you can have it aligned right to left or left to right for increasing wavelength at your preference.
 
