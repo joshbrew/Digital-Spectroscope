@@ -58,6 +58,10 @@ We are working on a web based hyperspectral imaging tool on top of a proof of co
     <td>
       <img src="./screenshots/imaging.jpg" alt="boxd" style="width: 100%;"/>
     </td>
+    <td>
+      Chocolate bar wrapper hyperspectral scan:<br>
+      <img src="https://github.com/joshbrew/cameraId-wonnx-wasm/assets/18196383/f62e5360-8742-4124-9eb2-8085ab54e5f9" alt="Capture2">
+    </td>
   </tr>
 </table>
 
