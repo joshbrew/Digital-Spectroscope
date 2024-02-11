@@ -5,7 +5,8 @@ REQUIRED HARDWARE
 [Qty. 1] - 1/4" x 20 square nut (for tripod/gimbal mount) (https://www.mcmaster.com/94855A247/)
 
 [Qty. 1] - Portable LED flashlight (recommended - https://a.co/d/3tgldf3)
-[Qty. 1] - Arducam (variant wip, OV2710 is OK)
+[Qty. 1] - Arducam (OV2710 is OK e.g. https://www.amazon.com/dp/B07CSPB8SD/)
+[Qty. 1] - 16mm M12 lens (20 deg) (e.g. https://www.amazon.com/dp/B07VDWNSG9)
 [Qty. 4] - Motherboard screws for Arducam (included w/ camera) 
 [Qty. 2] - 80mm-100mm snap-off/breakaway blades - (https://www.amazon.com/dp/B0CCRD8HMW)
 [Qty. 1] - 1000 line/mm diffraction grating (https://www.amazon.com/dp/B00K6K3MCW/)
