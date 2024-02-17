@@ -12,7 +12,7 @@
       "storage"
     ],
     "icons":[{
-      "src": "/src/assets/square.png",
+      "src": "demo_app/src/assets/square.png",
       "type": "image/png",
       "sizes": "256x256"
     }]
