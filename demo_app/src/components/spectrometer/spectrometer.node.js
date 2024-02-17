@@ -59,13 +59,13 @@ export class Spectrometer extends NodeDiv {
     captures = {};
     loaded = {}; //loaded images and videos
     imgfiles = {
-        'Test Image':'src/assets/spectrum_full.png',
-        'Spectrum 1': 'src/assets/spectrum1.png',
-        'Spectrum 2': 'src/assets/spectrum2.jpg',
-        'Shrimp': 'src/assets/shrimp.jpg',
-        'Chicken Fat': 'src/assets/chickenfat.png',
-        'Chicken Breast': 'src/assets/chickenbreast.png',
-        'Brown Beer Bottle': 'src/assets/brownbeerbottle.png'
+        'Test Image':'demo_app/src/assets/spectrum_full.png',
+        'Spectrum 1': 'demo_app/src/assets/spectrum1.png',
+        'Spectrum 2': 'demo_app/src/assets/spectrum2.jpg',
+        'Shrimp': 'demo_app/src/assets/shrimp.jpg',
+        'Chicken Fat': 'demo_app/src/assets/chickenfat.png',
+        'Chicken Breast': 'demo_app/src/assets/chickenbreast.png',
+        'Brown Beer Bottle': 'demo_app/src/assets/brownbeerbottle.png'
     }
     comparing = {
         sample1:undefined,
