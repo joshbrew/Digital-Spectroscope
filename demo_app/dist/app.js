@@ -19147,57 +19147,57 @@ frame buffering stuff cuz graphs\r
                 <table style="height:100%; width:100%; font-size:10px;">\r
                     <tr>\r
                         <td><span>Labeled <span id="labelcolors"></span> </span>\r
-                            <canvas id="compareall" height="300px" width="300px"></canvas>\r
+                            <canvas id="compareall" height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td><span>Sample 1<button id="sample1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="sample1" height="300px" width="300px"></canvas>\r
+                            <canvas id="sample1" height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <!-- <tr>\r
                         <td><span>Sample 1 Averaged<button id="sample1acsv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="sample1a"height="300px" width="300px"></canvas>\r
+                            <canvas id="sample1a"height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr> -->\r
                     <tr>\r
                         <td><span>Sample 2<button id="sample2csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="sample2"height="300px" width="300px"></canvas>\r
+                            <canvas id="sample2"height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <!-- <tr>\r
                         <td><span>Sample 2 Averaged<button id="sample2acsv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="sample2a"height="300px" width="300px"></canvas>\r
+                            <canvas id="sample2a"height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr> -->\r
                     <tr>\r
                         <td colspan="2"><span>Difference: Sample 2 - Sample 1<button id="s2-s1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="s2-s1"height="300px" width="300px"></canvas>\r
+                            <canvas id="s2-s1"height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td colspan="2"><span>Baseline<button id="baselinecsv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="baseline"height="300px" width="300px"></canvas>\r
+                            <canvas id="baseline"height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <!-- <tr>\r
                         <td><span>Baseline Averaged<button id="baselineacsv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="baselinea"height="300px" width="300px"></canvas>\r
+                            <canvas id="baselinea"height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr> -->\r
                     <tr>\r
                         <td><span>A1: Baseline - Sample 1 (absorbance)<button id="a1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="b-s1" height="300px" width="300px"></canvas>\r
+                            <canvas id="b-s1" height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td><span>A2: Baseline - Sample 2 (absorbance)<button id="a2csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="b-s2" height="300px" width="300px"></canvas>\r
+                            <canvas id="b-s2" height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                     <tr>\r
                         <td colspan="2"><span>Difference: A2 - A1<button id="d2-d1csv" title='Save CSV?'>\u{1F4C4}</button></span>\r
-                            <canvas id="d2-d1" height="300px" width="300px"></canvas>\r
+                            <canvas id="d2-d1" height="300px" width="800px"></canvas>\r
                         </td>\r
                     </tr>\r
                 </table>\r
