@@ -2,10 +2,10 @@
 <html>
     <head>    
         <link rel="manifest" href="manifest.webmanifest">
-        <link rel="apple-touch-icon" href="src/assets/square.png">
+        <link rel="apple-touch-icon" href="demoapp/src/assets/square.png">
         <meta name="apple-mobile-web-app-status-bar" content="#000000">
         <meta name="theme-color" content="#000000">
-        <link rel=stylesheet href="dist/app.css"></link>
+        <link rel=stylesheet href="demoapp/dist/app.css"></link>
         <style>
         </style>
        <script>
@@ -23,7 +23,7 @@
 
         function registerSW() {
             navigator.serviceWorker
-            .register('./sw.js')
+            .register('./demo_app/sw.js')
             .then(registration => {
                 registration.onupdatefound = () => {
                   const installingWorker = registration.installing;
@@ -66,7 +66,7 @@
                 // Add some additional logging to localhost, pointing developers to the
                 
                 // Check if the service worker can be found. If it can't reload the page.
-                fetch('./sw.js')
+                fetch('./demoapp/sw.js')
                 .then(response => {
                     // Ensure service worker exists, and that we really are getting a JS file.
                     const contentType = response.headers.get('content-type');
@@ -104,7 +104,7 @@
             
         });
     </script>
-        <script src="./dist/app.js" type="module"> </script>
+        <script src="./demoapp/dist/app.js" type="module"> </script>
     </head>
     <body style="background-color:#101010;">
     </body>
