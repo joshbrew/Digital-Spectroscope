@@ -37,6 +37,30 @@ We are working on a web based hyperspectral imaging tool on top of a proof of co
   </tr>
 </table>
 
+### Phone Hyperspectral Imaging Results:
+
+<table>
+  <tr>
+    <td>
+      <img src="./screenshots/hyperspectral/setup.webp" alt="setup" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/hyperspectral/light.webp" alt="light" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/hyperspectral/fossil.webp" alt="fossil" style="width: 100%;"/>
+    </td>
+  </tr>
+  <tr>
+    <td colSpan="2">
+      <img src="./screenshots/hyperspectral/scan1_3.webp" alt="scan" style="width: 100%;"/>
+    </td>
+    <td>
+      <img src="./screenshots/hyperspectral/scan3_3.webp" alt="scan2" style="width: 100%;"/>
+    </td>
+  </tr>
+</table>
+
 ### Revision 1 by Bernard Markus:
 
 <table>
