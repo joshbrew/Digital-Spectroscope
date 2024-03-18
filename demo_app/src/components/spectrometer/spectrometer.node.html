@@ -1,0 +1,161 @@
+
+
+
+<!--
+
+<ImageOrVid><Result watched image>
+<Menu>
+<Result Spectrogram> <Compared Spectrogram> (can overlay)
+<Res2>               <Comp2>
+    ...                 ...
+
+todo:
+
+Concise menu, finish file loading
+Result list + comparison
+Result saving/loading files
+mediarecorder on canvas result too for vod
+webworkers probably good idea for processing image on secondary canvases
+
+frame buffering stuff cuz graphs
+
+
+-->
+
+        <div id="pickerDiv" style="position: relative; display:flex; align-items:center; justify-content:center;" title="Source Image or Video. Click in two places to create a snippet on the right then click Analyze when the spectrogram is in view."> <!-- We want the source canvas to maintain the source image/video's aspect ratio so it looks correct, the capture can be stretched otherwise-->
+            <div id="sourcedeets" style="position:absolute; z-index:4; color:white; font-size:10px; top:0px; right:0px;"></div>
+            <img src="" style="position: absolute; z-index:1;" ></img>
+            <video src="" style="position: absolute; display:none; z-index:2;" ></video>
+            <canvas id="picker" style="position: absolute; z-index:3;" ></canvas>
+        </div>
+        <div id="captureDiv" title="Capture View">
+            <div style="position:absolute; z-index:5; color:white; font-size:10px;  right:0px;" id="capturedeets"></div>
+            <canvas id="capture" style="position:absolute; width:100%; height:100%;" height="100%" width="100%"></canvas>
+            <canvas id="capturegraph" style="position:absolute; z-index:10; width:100%; height:100%;" height="100%" width="100%"></canvas>
+        </div>
+        
+        <button id="toggleMenu" style="display:none;">Toggle Menu</button>
+
+        <div id="menu" title="Source controls">
+            <div style="color:white;">📸
+                <span id="labels"></span>
+                <input type="text" id="labelinput" placeholder="e.g. Pollock, Sea Bass"></input>
+                <button id="setlabel">Add Label</button>
+            </div> <!-- Labels are replacing the Analyze Button -->   
+            <br>      
+            <button id="snip" title="Capture and Analyze Spectrogram?" style="display:none;">Analyze 💻</button>
+            <span id="videomenu" style="display:none;">
+                <select id="camsrc" title="Cam selector"></select>
+                <button id="showgraph" title="Show live spectrogram? May cause slowdown.">📈</button>
+                <button id="record" title="Record MP4 of capture? (graph not included)">🔴</button>
+            </span>
+            <br>
+            <button id="webcam">Use Camera 🎥</button>
+            <button id="fileinput">Upload File 📥</button>
+            <button id="useurl">Use URL 🌐</button>
+            <span id="urlmenu">
+                <br>
+                <button id="image">Use Image 🖼️</button>
+                <span id="imgmenu">
+                    <span style="color:white;">Preloaded Images:</span>
+                    <select id="imgselect"></select>
+                </span>
+                <input type="url" id="urlinput" placeholder="Image or Video File URL"></input>
+                <span style="color:white;">File type:</span>
+                <select id="urlselect">
+                    <option value="img" selected>Image</option>
+                    <option value="video">Video</option>
+                </select>
+                <button id="seturl">Set URL</button>
+            </span>
+            <div>
+                <span style="color:white">
+                    X0:<input id="x0" type="number" min="0" style="width:40px;">
+                    X1:<input id="x1" type="number" min="0" style="width:40px;">
+                </span>
+                <span style="color:white">
+                    Y0:<input id="y0" type="number" min="0" style="width:40px;">
+                    Y1:<input id="y1" type="number" min="0" style="width:40px;">
+                </span>
+            </div>   
+            <button style="float:right;" id="help" title="Help!">❓</button>
+            <br>
+            <div id="instructions" style="color:white; display:none;">
+                Instructions: Click to draw a rectangle around the portion of the image or video you want to snip, 
+                then click a label to create a downloadable spectrogram you can compare with other results! Each click will continuously average that image for that label.
+            </div>
+            <br>
+        <hr>
+            </div>
+        <div  id="compare" style="overflow-y:scroll;" title="Compare spectrogram results directly.">
+            <span>Mix & Compare</span>
+            <div id="comparelist">
+                <table style="height:100%; width:100%; font-size:10px;">
+                    <tr>
+                        <td><span>Labeled <span id="labelcolors"></span> </span>
+                            <canvas id="compareall" height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span>Sample 1<button id="sample1csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="sample1" height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <!-- <tr>
+                        <td><span>Sample 1 Averaged<button id="sample1acsv" title='Save CSV?'>📄</button></span>
+                            <canvas id="sample1a"height="300px" width="800px"></canvas>
+                        </td>
+                    </tr> -->
+                    <tr>
+                        <td><span>Sample 2<button id="sample2csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="sample2"height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <!-- <tr>
+                        <td><span>Sample 2 Averaged<button id="sample2acsv" title='Save CSV?'>📄</button></span>
+                            <canvas id="sample2a"height="300px" width="800px"></canvas>
+                        </td>
+                    </tr> -->
+                    <tr>
+                        <td colspan="2"><span>Difference: Sample 2 - Sample 1<button id="s2-s1csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="s2-s1"height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><span>Baseline<button id="baselinecsv" title='Save CSV?'>📄</button></span>
+                            <canvas id="baseline"height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <!-- <tr>
+                        <td><span>Baseline Averaged<button id="baselineacsv" title='Save CSV?'>📄</button></span>
+                            <canvas id="baselinea"height="300px" width="800px"></canvas>
+                        </td>
+                    </tr> -->
+                    <tr>
+                        <td><span>A1: Baseline - Sample 1 (absorbance)<button id="a1csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="b-s1" height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span>A2: Baseline - Sample 2 (absorbance)<button id="a2csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="b-s2" height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><span>Difference: A2 - A1<button id="d2-d1csv" title='Save CSV?'>📄</button></span>
+                            <canvas id="d2-d1" height="300px" width="800px"></canvas>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="captured" style="overflow-y:scroll;" title="All captures made this session.">
+            <span>Captures</span>
+            <div id="capturelist">
+            </div>
+        </div>
+        <div id="saved" style="display:none; overflow-y:scroll; overflow-x:hidden;" title="Captures that can be restored from cache.">
+            <span>Saved</span>
+            <div id="savedlist">
+            </div>
+        </div>

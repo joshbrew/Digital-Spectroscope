@@ -1,0 +1,22 @@
+REQUIRED HARDWARE
+
+[Qty. 8] - #4 x 1/2" Stainless Steel Wood Screws, or M3 x 0.5mm, 10mm-long machine screws (https://www.mcmaster.com/91239A115/)
+[Qty. 2] - M1.6 x 0.35mm, 12mm-long machine screws (https://www.mcmaster.com/91292A266/)
+[Qty. 1] - 1/4" x 20 square nut (flat/low profile) (for tripod/gimbal mount) (https://www.mcmaster.com/94855A247/)
+
+[Qty. 1] - Portable LED flashlight (recommended - https://a.co/d/3tgldf3)
+[Qty. 1] - Arducam (OV2710 is OK e.g. https://www.amazon.com/dp/B07CSPB8SD/)
+[Qty. 1] - 16mm M12 lens (20 deg) (e.g. https://www.amazon.com/dp/B07VDWNSG9)
+[Qty. 4] - Motherboard screws for Arducam (included w/ camera) 
+[Qty. 2] - 80mm-100mm snap-off/breakaway blades - (https://www.amazon.com/dp/B0CCRD8HMW)
+[Qty. 1] - 1000 line/mm diffraction grating (https://www.amazon.com/dp/B00K6K3MCW/)
+
+
+PRINT SETTINGS:
+- .4mm nozzle is OK, 
+- PLA is OK. We prefer [black PLA+](https://www.amazon.com/PLA-Filament-SUNLU-Dimensional-Plus/dp/B08CVG2RVP/ref=sr_1_2_pp?keywords=carbon+fiber+filament&sr=8-2) or [black PETG-CF](https://www.amazon.com/Filament-Dimensional-Accuracy-Printing-Polycarbonate/dp/B075SXS6NP/ref=sr_1_3_pp?keywords=carbon+fiber+filament&sr=8-3)
+- 2 walls OK
+- 20% infill OK. Material should not be translucent or highly reflective.
+- Use Supports on 90deg overhang for headlamp mount. Not needed anywhere else except maybe the lens caps depending on your printer.
+
+
