@@ -5,12 +5,12 @@ This repository contains free digital spectroscopy software and 3D printable .3m
 
 ## 3D Printing:
 - [3D Prints](./3D_PRINTABLE/Main%20Modules/)
-- Arducam Mount: [Materials](./3D_PRINTABLE/Main%20Modules/Required%20Hardware%20List%20-%20Arducam%20Version.txt)
-- Mobile Camera Mount: [Materials](./3D_PRINTABLE/Main%20Modules/Required%20Hardware%20List%20-%20Smartphone%20Version.txt)
+- [Arducam Spectrometer Assembly Instructions pdf](./3D_PRINTABLE/Arducam%20Spectrometer%20Assembly%20Instructions.pdf)
+- [Smartphone Spectrometer Assembly Instructions pdf](./3D_PRINTABLE/Smartphone%20Spectrometer%20Assembly%20Instructions.pdf)
 
 ## Additional Resources
+- [Spectrometer Machine Learning Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
 - [Spectrometer Workbench Demo](https://camspectrometer.netlify.app)
-- [Machine Learning Spectral/Image Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
 - [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
 - [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
 
