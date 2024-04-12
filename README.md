@@ -3,6 +3,8 @@
 
 This repository contains free digital spectroscopy software and 3D printable .3mf files (by Davis Fay and Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
 
+### [Project Review Paper (draft)](https://docs.google.com/document/d/1jqOdnaSaDtLiG4n5NSiPDjHjF8f8xg1o8EnSWcibRvs/edit?usp=drive_link)
+
 ## 3D Printing:
 - [3D Prints](./3D_PRINTABLE/Main%20Modules/)
 - [Arducam Spectrometer Assembly Instructions pdf](./3D_PRINTABLE/Arducam%20Spectrometer%20Assembly%20Instructions.pdf)
