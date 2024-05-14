@@ -98,9 +98,9 @@ Make sure the diffraction grating is aligned vertically with the slit. The camer
 
 Perform digital spectral decomposition in your browser! 
 
-This repo comes with a digital spectrometer workbench prototype, works with any webcam or image/video uploads. This is a pre-alpha functional test. See the live demo at https://camspectrometer.netlify.app built directly from this repo using Netlify.
+[ONNX Camera ID Demo](https://github.com/joshbrew/cameraId-wonnx-wasm) for a real time video image classifier demo, which will analyze averaged frames from your digital spectroscope and run results through a classifier or let you generate datasets on the fly. Also links to the training and exporting software for creating compressed XGBoost models from your dataset.
 
-See also: [WONNX Camera ID Demo](https://github.com/joshbrew/cameraId-wonnx-wasm) for a real time video classifier demo, which we're working on hooking up to the spectrogram outputs as well for a proof of concept.
+This repo comes with a digital spectrometer workbench prototype, works with any webcam or image/video uploads. This is a pre-alpha functional test. See the live demo at https://camspectrometer.netlify.app built directly from this repo using Netlify.
 
 To run:
 `npm start` or `tinybuild`
