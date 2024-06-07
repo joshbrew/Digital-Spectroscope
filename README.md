@@ -13,6 +13,7 @@ This repository contains free digital spectroscopy software and 3D printable .3m
 ## Additional Resources
 - [Spectrometer Machine Learning Identification Demo](https://github.com/joshbrew/cameraId-wonnx-wasm)
 - [Spectrometer Workbench Demo](https://camspectrometer.netlify.app)
+- [Py Spectrometer by Les' Lab](https://github.com/leswright1977/PySpectrometer2) - software should work out of the box with the USB camera!
 - [Original Theremino DIY Guide](https://www.theremino.com/wp-content/uploads/files/Theremino_Spectrometer_Construction_ENG.pdf)
 - [DIY Hyperspectral imaging paper](https://www.mdpi.com/2313-433X/7/8/136)
 
