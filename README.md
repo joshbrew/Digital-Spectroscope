@@ -1,7 +1,7 @@
 
 # DIY Digital Spectroscopy
 
-This repository contains free digital spectroscopy software and 3D printable .3mf files (by Davis Fay and Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. We also added a variant (way late, sorry) using the same tubes from the PySpectrometer so you can get a more lab-grade image. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
+This repository contains free digital spectroscopy software and 3D printable .3mf files (by Davis Fay and Bernard Markus) for an Arducam + 10deg-20deg lens digital spectroscope. Uses stock 1000 line/mm diffraction grating sheets over the lens. We also added a variant (way late, sorry) using the [same tubes](https://www.patonhawksley.com/product-page/benchtop-spectroscope) from the PySpectrometer so you can get a more lab-grade image. The slit uses single edge stainless steel razor blades glued to an adjustible front plate for precise slit width control, we achieved <0.05mm easily with a spacer.
 
 ### [Project Review Paper (draft)](https://docs.google.com/document/d/1jqOdnaSaDtLiG4n5NSiPDjHjF8f8xg1o8EnSWcibRvs/edit?usp=drive_link)
 
